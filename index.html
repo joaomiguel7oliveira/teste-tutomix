@@ -1,0 +1,906 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<title>Galeria de Mídia Dinâmica</title>
+<style>
+  /* --- 1. LAYOUT GERAL E TEMA --- */
+  @import url('https://fonts.googleapis.com/css2?family=Roboto+Serif:ital,opsz,wght@0,8..144,100..900;1,8..144,100..900&display=swap');
+  body {
+    margin: 0;
+    background: #a1a1a1;
+    font-family: roboto, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    padding: 20px 0;
+    transition: background-color 0.5s ease;
+  }
+
+  .main-title {
+    color: #333;
+    width: min(700px, 90vw); 
+    font-size: min(40px, 10vw);
+    margin-top: 20px;
+    transition: color 0.5s ease;
+    margin-bottom: 0;
+    font-family: 'roboto serif', serif;
+    font-weight: 500;
+  }
+
+  .linha-titulo {
+    width: 700px;
+    height: 2px;
+    background-color: #333;
+    transition: background-color 0.5s ease;
+    border: 0;
+    margin: 10px auto 10px auto;
+  }
+
+    .theme-is-dark .linha-titulo {
+    background-color: #aaa; /* ou #ffffff para branco */
+  }
+
+  .carousel-section h2 {
+    color: #444;
+    margin-bottom: 15px;
+    font-weight: normal;
+    transition: color 0.5s ease;
+    font-size: 28px;
+  }
+
+  /* Adaptação dos títulos para o tema escuro */
+  .theme-is-dark .main-title,
+  .theme-is-dark .carousel-section h2 {
+    color: white;
+  }
+
+  .theme-is-dark .main-title {
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.6);
+  }
+
+  /* --- 2. ESTRUTURA DO CARROSSEL E MÍDIA --- */
+  .carousel-section {
+    display: flex;
+    flex-direction: column;
+    font-family: 'roboto', sans-serif;
+  }
+
+  .carousel-container {
+    width: 90vw;
+    max-width: 700px;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    border-radius: 7px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    position: relative;
+    background-color: #000;
+  }
+
+  .carousel {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .media-wrapper {
+    flex: 0 0 100%;
+    width: 100%;
+    height: 100%;
+    opacity: 0.25;
+    pointer-events: none;
+    position: relative;
+    transition: opacity 0.3s ease-in-out;
+  }
+
+  .media-wrapper.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  video, img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .carousel-container:fullscreen video {
+    object-fit: contain;
+  }
+
+  /* --- 3. CAMADAS SOBRE A MÍDIA (TÍTULO, CONTADOR, ETC) --- */
+  .slide-title {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 8px 15px;
+    color: white;
+    font-size: 16px;
+    font-family: 'roboto serif', serif;
+    user-select: none;
+    z-index: 6;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+    background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
+    width: 100%;
+    box-sizing: border-box;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .slide-counter {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    color: white;
+    font-size: 14px;
+    user-select: none;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    background-color: rgba(0, 0, 0, 0.4);
+    padding: 3px 8px;
+    border-radius: 10px;
+    z-index: 6; 
+  }
+  
+  .play-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 60px;
+    color: white;
+    pointer-events: none;
+    user-select: none;
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.8);
+    z-index: 5;
+    display: block;
+    transition: opacity 0.2s ease-in-out;
+  }
+
+  .fade-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgb(0, 0, 0);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    z-index: 4;
+  }
+
+  /* --- 4. CONTROLES DO PLAYER --- */
+  .video-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .image-controls {
+    justify-content: flex-start;
+  }
+
+  .play-pause-btn {
+    background: none; border: none;
+    color: white; font-size: 24px;
+    cursor: pointer; padding: 0; line-height: 1;
+  }
+
+  .time-display {
+    color: white;
+    font-size: 14px;
+    user-select: none;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+  }
+
+  .progress-bar {
+    flex-grow: 1;
+    height: 8px;
+    background-color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  .progress {
+    height: 100%;
+    width: 0;
+    background-color: white;
+    border-radius: 4px;
+    pointer-events: none;
+  }
+
+  .control-btn {
+    background: none; border: none; color: white;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0; line-height: 1; opacity: 0.7;
+    transition: opacity 0.2s, color 0.2s;
+    font-weight: bold;
+  }
+  .control-btn:hover { opacity: 1; }
+  .control-btn.active {
+    color: #00aaff;
+    opacity: 1;
+  }
+
+  /* --- 5. NAVEGAÇÃO DO CARROSSEL (SETAS E ÍNDICE) --- */
+.nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 32px; /* <-- Alterado para pixels */
+    color: white;
+    background: rgba(0,0,0,0.5);
+    padding: 8px; /* <-- Também alterado para pixels para consistência */
+    cursor: pointer;
+    z-index: 10;
+    user-select: none;
+    border-radius: 8px;
+  }
+  .prev { left: 10px; }
+  .next { right: 10px; }
+
+  .carousel-index {
+    list-style: none;
+    padding: 0;
+    margin: 10px auto 0 auto;
+    max-width: 700px;
+    width: 90vw;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    justify-content: center;
+  }
+  
+  /* Estilo padrão do índice (tema claro) */
+  .carousel-index li {
+    color: #333;
+    padding: 2px 4px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: color 0.2s;
+    border-bottom: 2px solid transparent;
+  }
+  .carousel-index li:hover { color: #000; }
+  .carousel-index li.active {
+    color: #000;
+    font-weight: bold;
+    border-bottom: 2px solid #000;
+  }
+
+  /* Estilo do índice para o tema escuro */
+  .theme-is-dark .carousel-index li { color: #e0e0e0; }
+  .theme-is-dark .carousel-index li:hover { color: #ffffff; }
+  .theme-is-dark .carousel-index li.active {
+    color: #ffffff;
+    font-weight: bold;
+    border-bottom: 2px solid #00aaff;
+  }
+
+/* --- 6. COMPONENTES DE UI (SELETORES) - VERSÃO "RAÍZ" --- */
+  .theme-switcher { 
+    position: fixed; 
+    bottom: 20px; 
+    right: 20px; 
+    z-index: 1000; 
+  }
+  
+  .color-palette {
+    /* Agora a paleta está sempre visível e é o componente principal */
+    display: flex;
+    gap: 5px;
+    background-color: rgba(128, 128, 128);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    backdrop-filter: blur(5px); /* Efeito de vidro fosco, se o navegador suportar */
+  }
+
+  .color-option {
+    width: 10px;   /* Quadrado */
+    height: 10px;  /* Quadrado */
+    cursor: pointer;
+    border: 2px solid transparent; /* Borda invisível para manter o tamanho */
+    transition: transform 0.2s, border-color 0.2s;
+  }
+
+  .color-option:hover {
+    transform: scale(1.1); /* Efeito de zoom sutil no hover */
+  }
+
+  /* Nova regra para destacar a cor ativa */
+  .color-option.active {
+    border-color: #ffffff; /* Borda branca e grossa para indicar a seleção */
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+  }
+
+  /* --- 7. REGRAS DE ADAPTAÇÃO (HOVER) --- */
+  /* Aparição de controles em dispositivos com mouse */
+  @media (hover: hover) {
+    .media-wrapper:hover .video-controls,
+    .media-wrapper:hover .slide-title {
+      opacity: 1;
+    }
+  }
+
+  /* Aparição de controles em dispositivos touch (durante a reprodução) */
+  @media (hover: none), (pointer: coarse) {
+    .media-wrapper.video-is-playing .video-controls,
+    .media-wrapper.video-is-playing .slide-title {
+      opacity: 1;
+    }
+  }
+
+    .carousel-header {
+    width: min(700px, 90vw); 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .carousel-section h2 {
+    margin: 0; /* Remove a margem do h2 já que o header controla */
+    text-align: left;
+  }
+
+  .download-btn {
+    background-color: #f0f0f0;
+    color: #333;
+    padding: 8px 16px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+    border: 1px solid #ccc;
+    transition: background-color 0.2s, color 0.2s;
+    white-space: nowrap; /* Impede que o texto quebre em duas linhas */
+  }
+
+  .download-btn:hover {
+    background-color: #e0e0e0;
+  }
+
+  /* Adaptação do botão para o tema escuro */
+  .theme-is-dark .download-btn {
+    background-color: #3a3a3a;
+    color: #f0f0f0;
+    border-color: #555;
+  }
+
+  .theme-is-dark .download-btn:hover {
+    background-color: #4a4a4a;
+  }
+</style>
+
+
+
+
+
+</head> 
+<body>
+  <h1 class="main-title">Galeria de Mídia<br><hr class="linha-titulo"</h1>
+  
+  <section class="carousel-section">
+    <div class="carousel-header">
+      <h2>Parte1</h2>
+      <a href="midias/parte1/asdfasdf.zip" class="download-btn" download="asdfasdf.zip">Baixar Arquivos</a>
+    </div>
+    <div class="carousel-container" id="parte10">
+      <div class="carousel">
+        
+        <div class="media-wrapper">
+          <div class="slide-title">1</div>
+          <video src="midias/parte1/1.mp4" muted preload="metadata"></video>
+          <div class="play-overlay">▶</div>
+          <div class="fade-overlay"></div>
+          <div class="slide-counter"></div>
+          <div class="video-controls">
+            <button class="play-pause-btn">▶</button>
+            <div class="time-display">
+              <span class="current-time">00:00</span> / <span class="total-duration">00:00</span>
+            </div>
+            <div class="progress-bar"><div class="progress"></div></div>
+            <button class="control-btn end-mode-btn" title="Próximo Automático">⏭️</button>
+            <button class="control-btn speed-btn" title="Velocidade (1x)">1x</button>
+            <button class="control-btn fullscreen-btn" title="Tela Inteira">🔳</button>
+          </div>
+        </div>
+        <div class="media-wrapper">
+          <div class="slide-title">2</div>
+          <video src="midias/parte1/2.mp4" muted preload="metadata"></video>
+          <div class="play-overlay">▶</div>
+          <div class="fade-overlay"></div>
+          <div class="slide-counter"></div>
+          <div class="video-controls">
+            <button class="play-pause-btn">▶</button>
+            <div class="time-display">
+              <span class="current-time">00:00</span> / <span class="total-duration">00:00</span>
+            </div>
+            <div class="progress-bar"><div class="progress"></div></div>
+            <button class="control-btn end-mode-btn" title="Próximo Automático">⏭️</button>
+            <button class="control-btn speed-btn" title="Velocidade (1x)">1x</button>
+            <button class="control-btn fullscreen-btn" title="Tela Inteira">🔳</button>
+          </div>
+        </div>
+        <div class="media-wrapper">
+          <div class="slide-title">3</div>
+          <video src="midias/parte1/3.mp4" muted preload="metadata"></video>
+          <div class="play-overlay">▶</div>
+          <div class="fade-overlay"></div>
+          <div class="slide-counter"></div>
+          <div class="video-controls">
+            <button class="play-pause-btn">▶</button>
+            <div class="time-display">
+              <span class="current-time">00:00</span> / <span class="total-duration">00:00</span>
+            </div>
+            <div class="progress-bar"><div class="progress"></div></div>
+            <button class="control-btn end-mode-btn" title="Próximo Automático">⏭️</button>
+            <button class="control-btn speed-btn" title="Velocidade (1x)">1x</button>
+            <button class="control-btn fullscreen-btn" title="Tela Inteira">🔳</button>
+          </div>
+        </div>
+      </div>
+      <div class="nav prev" onclick="prevMedia('parte10')">⟨</div>
+      <div class="nav next" onclick="nextMedia('parte10')">⟩</div>
+    </div>
+    <ul class="carousel-index"><li data-index="0">1</li><li data-index="1">2</li><li data-index="2">3</li></ul>
+  </section>
+  <section class="carousel-section">
+    <div class="carousel-header">
+      <h2>Parte2</h2>
+      
+    </div>
+    <div class="carousel-container" id="parte21">
+      <div class="carousel">
+        
+        <div class="media-wrapper">
+          <div class="slide-title">5</div>
+          <video src="midias/parte2/5.mp4" muted preload="metadata"></video>
+          <div class="play-overlay">▶</div>
+          <div class="fade-overlay"></div>
+          <div class="slide-counter"></div>
+          <div class="video-controls">
+            <button class="play-pause-btn">▶</button>
+            <div class="time-display">
+              <span class="current-time">00:00</span> / <span class="total-duration">00:00</span>
+            </div>
+            <div class="progress-bar"><div class="progress"></div></div>
+            <button class="control-btn end-mode-btn" title="Próximo Automático">⏭️</button>
+            <button class="control-btn speed-btn" title="Velocidade (1x)">1x</button>
+            <button class="control-btn fullscreen-btn" title="Tela Inteira">🔳</button>
+          </div>
+        </div>
+        <div class="media-wrapper">
+          <div class="slide-title">6 Embalse Guatapé, Colômbia</div>
+          <img src="midias/parte2/6 Embalse Guatapé, Colômbia.jpg" draggable="false"/>
+          <div class="slide-counter"></div>
+          <div class="video-controls image-controls">
+          </div>
+        </div>
+        <div class="media-wrapper">
+          <div class="slide-title">7 Dieserto del Diablo, Argentina</div>
+          <img src="midias/parte2/7 Dieserto del Diablo, Argentina.jpeg" draggable="false"/>
+          <div class="slide-counter"></div>
+          <div class="video-controls image-controls">
+          </div>
+        </div>
+        <div class="media-wrapper">
+          <div class="slide-title">8</div>
+          <video src="midias/parte2/8.mp4" muted preload="metadata"></video>
+          <div class="play-overlay">▶</div>
+          <div class="fade-overlay"></div>
+          <div class="slide-counter"></div>
+          <div class="video-controls">
+            <button class="play-pause-btn">▶</button>
+            <div class="time-display">
+              <span class="current-time">00:00</span> / <span class="total-duration">00:00</span>
+            </div>
+            <div class="progress-bar"><div class="progress"></div></div>
+            <button class="control-btn end-mode-btn" title="Próximo Automático">⏭️</button>
+            <button class="control-btn speed-btn" title="Velocidade (1x)">1x</button>
+            <button class="control-btn fullscreen-btn" title="Tela Inteira">🔳</button>
+          </div>
+        </div>
+        <div class="media-wrapper">
+          <div class="slide-title">8b</div>
+          <video src="midias/parte2/8b.mp4" muted preload="metadata"></video>
+          <div class="play-overlay">▶</div>
+          <div class="fade-overlay"></div>
+          <div class="slide-counter"></div>
+          <div class="video-controls">
+            <button class="play-pause-btn">▶</button>
+            <div class="time-display">
+              <span class="current-time">00:00</span> / <span class="total-duration">00:00</span>
+            </div>
+            <div class="progress-bar"><div class="progress"></div></div>
+            <button class="control-btn end-mode-btn" title="Próximo Automático">⏭️</button>
+            <button class="control-btn speed-btn" title="Velocidade (1x)">1x</button>
+            <button class="control-btn fullscreen-btn" title="Tela Inteira">🔳</button>
+          </div>
+        </div>
+        <div class="media-wrapper">
+          <div class="slide-title">9 Lago Maroon Bells Colorado</div>
+          <img src="midias/parte2/9 Lago Maroon Bells Colorado.jpeg" draggable="false"/>
+          <div class="slide-counter"></div>
+          <div class="video-controls image-controls">
+          </div>
+        </div>
+      </div>
+      <div class="nav prev" onclick="prevMedia('parte21')">⟨</div>
+      <div class="nav next" onclick="nextMedia('parte21')">⟩</div>
+    </div>
+    <ul class="carousel-index"><li data-index="0">5</li><li data-index="1">6 Embalse Guatapé, Colômbia</li><li data-index="2">7 Dieserto del Diablo, Argentina</li><li data-index="3">8</li><li data-index="4">8b</li><li data-index="5">9 Lago Maroon Bells Colorado</li></ul>
+  </section>
+  <div class="theme-switcher">
+  <div class="color-palette">
+      <div class="color-option" style="background-color: #b9b9b9;" data-color="#c2c2c2"></div>
+      <div class="color-option" style="background-color: #cac2b4;" data-color="#cec6b7"></div>
+      <div class="color-option" style="background-color: #9ab6c9;" data-color="#97c7e7"></div>
+      <div class="color-option" style="background-color: #a9b9a6;" data-color="#a9b9a6"></div>
+      <div class="color-option" style="background-color: #333333;" data-color="#333333"></div>
+    </div>
+  </div>
+<script>
+  const carrosseis = {};
+  carrosseis.states = {};
+  let globalEndMode = 2;
+  const endModesConfig = [
+    { icon: '⏭️', title: 'Próximo Automático' },
+    { icon: '🔁', title: 'Repetir Vídeo' },
+    { icon: '→|', title: 'Congelar no Final' }
+  ];
+
+  function isColorDark(hexColor) {
+    const hex = hexColor.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness < 128;
+  }
+
+  function formatTime(timeInSeconds) {
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = Math.floor(timeInSeconds % 60);
+    // CORRIGIDO: Usando crases (template literals) corretamente
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
+
+  function updateSlideCounter(id) {
+    const state = carrosseis.states[id];
+    if (!state) return;
+    const totalSlides = state.wrappers.length;
+    const currentSlide = state.current + 1;
+    const container = document.getElementById(id);
+    container.querySelectorAll('.slide-counter').forEach(counter => {
+      // CORRIGIDO: Usando crases (template literals) corretamente
+      counter.textContent = `${currentSlide} / ${totalSlides}`;
+    });
+  }
+
+  function updateArrowVisibility(id) {
+    const state = carrosseis.states[id];
+    if (!state) return;
+    const container = document.getElementById(id);
+    const prevArrow = container.querySelector('.nav.prev');
+    const nextArrow = container.querySelector('.nav.next');
+    const totalSlides = state.wrappers.length;
+    const currentIndex = state.current;
+    if (totalSlides <= 1) {
+      prevArrow.style.display = 'none';
+      nextArrow.style.display = 'none';
+      return;
+    }
+    prevArrow.style.display = (currentIndex === 0) ? 'none' : 'block';
+    nextArrow.style.display = (currentIndex === totalSlides - 1) ? 'none' : 'block';
+  }
+
+    function updateIndexHighlight(id) {
+    const state = carrosseis.states[id];
+    if (!state) return;
+    const container = document.getElementById(id);
+    const indexList = container.nextElementSibling;
+    if (indexList && indexList.classList.contains('carousel-index')) {
+      const items = indexList.querySelectorAll('li');
+      items.forEach((item, index) => {
+        if (index === state.current) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+    }
+  }
+
+  function atualizarTodosOsBotoesDeModo() {
+    const novoModo = endModesConfig[globalEndMode];
+    document.querySelectorAll('.end-mode-btn').forEach(btn => {
+      btn.textContent = novoModo.icon;
+      btn.title = novoModo.title;
+    });
+  }
+
+  function initCarousel(id) {
+    const container = document.getElementById(id);
+    const wrappers = container.querySelectorAll('.media-wrapper');
+    const videos = container.querySelectorAll('video');
+    carrosseis.states[id] = { current: 0, wrappers, videos, isPlaying: false, startX: 0, isDragging: false };
+
+    const savedState = JSON.parse(localStorage.getItem(`carouselState_${id}`)) || { current: 0 };
+    let initialSlideIndex = savedState.current;
+
+    if (initialSlideIndex >= wrappers.length) {
+      initialSlideIndex = 0;
+    }
+    
+    carrosseis.states[id].current = initialSlideIndex;
+    wrappers[initialSlideIndex]?.classList.add('active');
+    // CORRIGIDO: Usando crases (template literals) corretamente
+    container.querySelector('.carousel').style.transform = `translateX(-${initialSlideIndex * 100}%)`;
+
+    const navButtons = container.querySelectorAll('.nav');
+    navButtons.forEach(button => {
+      button.addEventListener('mousedown', (e) => e.stopPropagation());
+      button.addEventListener('mouseup', (e) => e.stopPropagation());
+      button.addEventListener('touchstart', (e) => e.stopPropagation());
+      button.addEventListener('touchend', (e) => e.stopPropagation());
+    });
+    
+    videos.forEach(video => {
+      const wrapper = video.closest('.media-wrapper');
+      const videoControls = wrapper.querySelector('.video-controls');
+
+      if (videoControls) {
+        videoControls.addEventListener('mousedown', (e) => e.stopPropagation());
+        videoControls.addEventListener('mouseup', (e) => e.stopPropagation());
+        videoControls.addEventListener('touchstart', (e) => e.stopPropagation());
+        videoControls.addEventListener('touchend', (e) => e.stopPropagation());
+      }
+
+      const playPauseBtn = wrapper.querySelector('.play-pause-btn');
+      const progressBar = wrapper.querySelector('.progress-bar');
+      const progress = wrapper.querySelector('.progress');
+      const overlay = wrapper.querySelector('.play-overlay');
+      const fadeOverlay = wrapper.querySelector('.fade-overlay');
+      const currentTimeEl = wrapper.querySelector('.current-time');
+      const totalDurationEl = wrapper.querySelector('.total-duration');
+      
+      video.addEventListener('loadedmetadata', () => {
+        if (totalDurationEl) { totalDurationEl.textContent = formatTime(video.duration); }
+      });
+      video.ontimeupdate = () => {
+        // CORRIGIDO: A linha crítica da barra de progresso
+        if (progress) progress.style.width = `${(video.currentTime / video.duration) * 100}%`;
+        if (currentTimeEl) { currentTimeEl.textContent = formatTime(video.currentTime); }
+      };
+      video.onplay = () => {
+        carrosseis.states[id].isPlaying = true;
+        playPauseBtn.textContent = '❚❚';
+        overlay.style.display = 'none';
+        fadeOverlay.style.opacity = '0';
+        wrapper.classList.add('video-is-playing');
+      };
+      video.onpause = () => {
+        carrosseis.states[id].isPlaying = false;
+        playPauseBtn.textContent = '▶';
+        overlay.style.display = 'block';
+        wrapper.classList.remove('video-is-playing');
+      };
+      video.onended = () => {
+        if (globalEndMode === 0) {
+          nextMedia(id, true);
+        } else if (globalEndMode === 1) {
+          fadeOverlay.style.opacity = '1';
+          setTimeout(() => {
+            video.currentTime = 0;
+            fadeOverlay.style.opacity = '0';
+            video.play();
+          }, 500);
+        } else if (globalEndMode === 2) {
+          video.currentTime = 0;
+        }
+      };
+      const endModeBtn = wrapper.querySelector('.end-mode-btn');
+      if (endModeBtn) endModeBtn.onclick = () => {
+        globalEndMode = (globalEndMode + 1) % endModesConfig.length;
+        atualizarTodosOsBotoesDeModo();
+      };
+      const speedBtn = wrapper.querySelector('.speed-btn');
+      if (speedBtn) speedBtn.onclick = () => {
+        video.playbackRate = video.playbackRate === 1 ? 2.0 : 1.0;
+        speedBtn.classList.toggle('active');
+        speedBtn.textContent = video.playbackRate === 1 ? '1x' : '2x';
+      };
+      const fullscreenBtn = wrapper.querySelector('.fullscreen-btn');
+      if (fullscreenBtn) fullscreenBtn.onclick = () => {
+        if (!document.fullscreenElement) {
+          // CORRIGIDO: Usando crases (template literals) corretamente
+          container.requestFullscreen().catch(err => alert(`Erro: ${err.message}`));
+        } else {
+          document.exitFullscreen();
+        }
+      };
+      if (playPauseBtn) playPauseBtn.onclick = () => void (video.paused ? video.play() : video.pause());
+      if (progressBar) progressBar.onclick = (e) => {
+        const rect = progressBar.getBoundingClientRect();
+        video.currentTime = ((e.clientX - rect.left) / rect.width) * video.duration;
+      };
+    });
+
+    container.addEventListener('mousedown', e => startDrag(e, id));
+    container.addEventListener('mousemove', e => drag(e, id));
+    container.addEventListener('mouseup', e => endDrag(e, id));
+    container.addEventListener('mouseleave', e => endDrag(e, id));
+    container.addEventListener('touchstart', e => startDrag(e, id));
+    container.addEventListener('touchmove', e => drag(e, id));
+    container.addEventListener('touchend', e => endDrag(e, id));
+
+    updateArrowVisibility(id);
+    updateSlideCounter(id);
+    
+    const indexList = container.nextElementSibling;
+    if (indexList && indexList.classList.contains('carousel-index')) {
+      const items = indexList.querySelectorAll('li');
+      items.forEach(item => {
+        item.addEventListener('click', () => {
+          const index = parseInt(item.dataset.index, 10);
+          showMedia(id, index);
+        });
+      });
+    }
+    updateIndexHighlight(id);
+  }
+
+  function showMedia(id, index, forcePlay = false) {
+    const state = carrosseis.states[id];
+    if (!state || index === state.current) return;
+    const shouldBePlaying = state.isPlaying || forcePlay;
+    const oldVideo = state.wrappers[state.current].querySelector('video');
+    if (oldVideo) {
+      oldVideo.pause();
+      oldVideo.currentTime = 0;
+      const oldFade = oldVideo.closest('.media-wrapper').querySelector('.fade-overlay');
+      if (oldFade) oldFade.style.opacity = '0';
+    }
+    state.wrappers.forEach(w => w.classList.remove('active'));
+    state.wrappers[index].classList.add('active');
+    
+    state.current = index;
+    // CORRIGIDO: Usando crases (template literals) corretamente para a chave do localStorage
+    localStorage.setItem(`carouselState_${id}`, JSON.stringify({ current: index }));
+    
+    updateArrowVisibility(id);
+    updateSlideCounter(id);
+    updateIndexHighlight(id);
+    // CORRIGIDO: Usando crases (template literals) corretamente
+    document.getElementById(id).querySelector('.carousel').style.transform = `translateX(-${index * 100}%)`;
+    const newVideo = state.wrappers[index].querySelector('video');
+    if (shouldBePlaying && newVideo) {
+      newVideo.play();
+    } else if (shouldBePlaying && !newVideo) {
+      state.isPlaying = true;
+    }
+  }
+
+  function endDrag(e, id) {
+    const state = carrosseis.states[id];
+    if (!state.isDragging) return;
+    state.isDragging = false;
+    const endX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+    const diff = endX - state.startX;
+    const carousel = document.getElementById(id).querySelector('.carousel');
+    carousel.style.transition = '';
+    if (diff > 50 && state.current > 0) {
+      prevMedia(id);
+    } else if (diff < -50 && state.current < state.wrappers.length - 1) {
+      nextMedia(id);
+    } else {
+      // CORRIGIDO: Usando crases (template literals) corretamente
+      carousel.style.transform = `translateX(-${state.current * 100}%)`;
+      const currentWrapper = state.wrappers[state.current];
+      const videoInCurrentSlide = currentWrapper.querySelector('video');
+      if (videoInCurrentSlide) {
+        videoInCurrentSlide.paused ? videoInCurrentSlide.play() : videoInCurrentSlide.pause();
+        e.preventDefault();
+      }
+    }
+  }
+
+  function nextMedia(id, forcePlay = false) {
+    const state = carrosseis.states[id];
+    if (state.current >= state.wrappers.length - 1) {
+      if (state.videos[state.current]) state.videos[state.current].pause();
+      return;
+    }
+    showMedia(id, state.current + 1, forcePlay);
+  }
+
+  function prevMedia(id) {
+    const state = carrosseis.states[id];
+    if (state.current > 0) {
+      showMedia(id, state.current - 1);
+    }
+  }
+
+  function startDrag(e, id) {
+    const state = carrosseis.states[id];
+    state.startX = e.touches ? e.touches[0].clientX : e.clientX;
+    state.isDragging = true;
+  }
+
+  function drag(e, id) {
+    const state = carrosseis.states[id];
+    if (!state.isDragging) return;
+    const currentX = e.touches ? e.touches[0].clientX : e.clientX;
+    const diff = currentX - state.startX;
+    const carousel = document.getElementById(id).querySelector('.carousel');
+    carousel.style.transition = 'none';
+    // CORRIGIDO: Usando crases (template literals) corretamente
+    carousel.style.transform = `translateX(calc(-${state.current * 100}% + ${diff}px))`;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const colorOptions = document.querySelectorAll('.color-option');
+    
+    // Função para definir o destaque da cor ativa
+    const setActiveColor = (selectedColor) => {
+      colorOptions.forEach(option => {
+        if (option.dataset.color === selectedColor) {
+          option.classList.add('active');
+        } else {
+          option.classList.remove('active');
+        }
+      });
+    };
+
+    // Carrega o tema e a cor salvos ao iniciar
+    const savedThemeColor = localStorage.getItem('appThemeColor') || '#a1a1a1'; // Padrão
+    const savedThemeMode = localStorage.getItem('appThemeMode') || 'light';   // Padrão
+
+    document.body.style.backgroundColor = savedThemeColor;
+    if (savedThemeMode === 'dark') {
+      document.body.classList.add('theme-is-dark');
+    } else {
+      document.body.classList.remove('theme-is-dark');
+    }
+    setActiveColor(savedThemeColor); // Destaca a cor salva
+
+    // Inicializa os carrosséis e botões
+    document.querySelectorAll('.carousel-container').forEach(c => initCarousel(c.id));
+    atualizarTodosOsBotoesDeModo();
+    
+    // Adiciona o evento de clique às opções de cor
+    colorOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        const newColor = option.dataset.color;
+        
+        document.body.style.backgroundColor = newColor;
+        localStorage.setItem('appThemeColor', newColor);
+        setActiveColor(newColor); // Atualiza o destaque
+
+        if (isColorDark(newColor)) {
+          document.body.classList.add('theme-is-dark');
+          localStorage.setItem('appThemeMode', 'dark');
+        } else {
+          document.body.classList.remove('theme-is-dark');
+          localStorage.setItem('appThemeMode', 'light');
+        }
+      });
+    });
+  });
+</script>
+</body>
+</html>
