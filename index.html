@@ -2,7 +2,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Galeria de Mídia Dinâmica</title>
 <style>
   /* --- 1. LAYOUT GERAL E TEMA --- */
@@ -31,7 +32,7 @@
   }
 
   .linha-titulo {
-    width: 700px;
+    width: 700px, 90vw;
     height: 2px;
     background-color: #333;
     transition: background-color 0.5s ease;
@@ -383,6 +384,12 @@
   .theme-is-dark .download-btn:hover {
     background-color: #4a4a4a;
   }
+
+
+
+
+
+
 </style>
 
 
@@ -553,6 +560,9 @@
       <div class="color-option" style="background-color: #333333;" data-color="#333333"></div>
     </div>
   </div>
+
+
+
 <script>
   const carrosseis = {};
   carrosseis.states = {};
@@ -575,18 +585,16 @@
   function formatTime(timeInSeconds) {
     const minutes = Math.floor(timeInSeconds / 60);
     const seconds = Math.floor(timeInSeconds % 60);
-    // CORRIGIDO: Usando crases (template literals) corretamente
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   }
 
+  // Funções de atualização (updateSlideCounter, updateArrowVisibility, etc.) permanecem as mesmas...
   function updateSlideCounter(id) {
     const state = carrosseis.states[id];
     if (!state) return;
     const totalSlides = state.wrappers.length;
     const currentSlide = state.current + 1;
-    const container = document.getElementById(id);
-    container.querySelectorAll('.slide-counter').forEach(counter => {
-      // CORRIGIDO: Usando crases (template literals) corretamente
+    state.container.querySelectorAll('.slide-counter').forEach(counter => {
       counter.textContent = `${currentSlide} / ${totalSlides}`;
     });
   }
@@ -594,33 +602,23 @@
   function updateArrowVisibility(id) {
     const state = carrosseis.states[id];
     if (!state) return;
-    const container = document.getElementById(id);
+    const { container, current, wrappers } = state;
     const prevArrow = container.querySelector('.nav.prev');
     const nextArrow = container.querySelector('.nav.next');
-    const totalSlides = state.wrappers.length;
-    const currentIndex = state.current;
-    if (totalSlides <= 1) {
-      prevArrow.style.display = 'none';
-      nextArrow.style.display = 'none';
-      return;
-    }
-    prevArrow.style.display = (currentIndex === 0) ? 'none' : 'block';
-    nextArrow.style.display = (currentIndex === totalSlides - 1) ? 'none' : 'block';
+    const totalSlides = wrappers.length;
+    const isSingleSlide = totalSlides <= 1;
+
+    prevArrow.style.display = isSingleSlide || current === 0 ? 'none' : 'block';
+    nextArrow.style.display = isSingleSlide || current === totalSlides - 1 ? 'none' : 'block';
   }
 
-    function updateIndexHighlight(id) {
+  function updateIndexHighlight(id) {
     const state = carrosseis.states[id];
     if (!state) return;
-    const container = document.getElementById(id);
-    const indexList = container.nextElementSibling;
+    const indexList = state.container.nextElementSibling;
     if (indexList && indexList.classList.contains('carousel-index')) {
-      const items = indexList.querySelectorAll('li');
-      items.forEach((item, index) => {
-        if (index === state.current) {
-          item.classList.add('active');
-        } else {
-          item.classList.remove('active');
-        }
+      indexList.querySelectorAll('li').forEach((item, index) => {
+        item.classList.toggle('active', index === state.current);
       });
     }
   }
@@ -633,43 +631,45 @@
     });
   }
 
+
   function initCarousel(id) {
     const container = document.getElementById(id);
-    const wrappers = container.querySelectorAll('.media-wrapper');
+    if (!container) return;
+
+    const carouselEl = container.querySelector('.carousel');
+    const wrappers = Array.from(container.querySelectorAll('.media-wrapper'));
     const videos = container.querySelectorAll('video');
-    carrosseis.states[id] = { current: 0, wrappers, videos, isPlaying: false, startX: 0, isDragging: false };
+
+    carrosseis.states[id] = {
+      container,
+      carouselEl,
+      wrappers,
+      videos,
+      current: 0,
+      isPlaying: false,
+      isDragging: false,
+      startX: 0,
+      startY: 0,
+      isSwipeIntent: null
+    };
 
     const savedState = JSON.parse(localStorage.getItem(`carouselState_${id}`)) || { current: 0 };
-    let initialSlideIndex = savedState.current;
-
-    if (initialSlideIndex >= wrappers.length) {
-      initialSlideIndex = 0;
-    }
+    let initialSlideIndex = savedState.current >= wrappers.length ? 0 : savedState.current;
     
     carrosseis.states[id].current = initialSlideIndex;
     wrappers[initialSlideIndex]?.classList.add('active');
-    // CORRIGIDO: Usando crases (template literals) corretamente
-    container.querySelector('.carousel').style.transform = `translateX(-${initialSlideIndex * 100}%)`;
+    carouselEl.style.transform = `translateX(-${initialSlideIndex * 100}%)`;
 
-    const navButtons = container.querySelectorAll('.nav');
-    navButtons.forEach(button => {
-      button.addEventListener('mousedown', (e) => e.stopPropagation());
-      button.addEventListener('mouseup', (e) => e.stopPropagation());
-      button.addEventListener('touchstart', (e) => e.stopPropagation());
-      button.addEventListener('touchend', (e) => e.stopPropagation());
+    // CORREÇÃO: Restaurada a lógica completa de stopPropagation para garantir que os cliques nos controles funcionem.
+    // Isso isola completamente os botões dos eventos de arrastar do contêiner.
+    container.querySelectorAll('.nav, .video-controls').forEach(el => {
+        ['mousedown', 'mouseup', 'touchstart', 'touchend'].forEach(evt => {
+            el.addEventListener(evt, e => e.stopPropagation());
+        });
     });
-    
+
     videos.forEach(video => {
       const wrapper = video.closest('.media-wrapper');
-      const videoControls = wrapper.querySelector('.video-controls');
-
-      if (videoControls) {
-        videoControls.addEventListener('mousedown', (e) => e.stopPropagation());
-        videoControls.addEventListener('mouseup', (e) => e.stopPropagation());
-        videoControls.addEventListener('touchstart', (e) => e.stopPropagation());
-        videoControls.addEventListener('touchend', (e) => e.stopPropagation());
-      }
-
       const playPauseBtn = wrapper.querySelector('.play-pause-btn');
       const progressBar = wrapper.querySelector('.progress-bar');
       const progress = wrapper.querySelector('.progress');
@@ -679,62 +679,60 @@
       const totalDurationEl = wrapper.querySelector('.total-duration');
       
       video.addEventListener('loadedmetadata', () => {
-        if (totalDurationEl) { totalDurationEl.textContent = formatTime(video.duration); }
+        if (totalDurationEl) totalDurationEl.textContent = formatTime(video.duration);
       });
       video.ontimeupdate = () => {
-        // CORRIGIDO: A linha crítica da barra de progresso
         if (progress) progress.style.width = `${(video.currentTime / video.duration) * 100}%`;
-        if (currentTimeEl) { currentTimeEl.textContent = formatTime(video.currentTime); }
+        if (currentTimeEl) currentTimeEl.textContent = formatTime(video.currentTime);
       };
       video.onplay = () => {
         carrosseis.states[id].isPlaying = true;
-        playPauseBtn.textContent = '❚❚';
-        overlay.style.display = 'none';
-        fadeOverlay.style.opacity = '0';
+        if(playPauseBtn) playPauseBtn.textContent = '❚❚';
+        if(overlay) overlay.style.display = 'none';
+        if(fadeOverlay) fadeOverlay.style.opacity = '0';
         wrapper.classList.add('video-is-playing');
       };
       video.onpause = () => {
         carrosseis.states[id].isPlaying = false;
-        playPauseBtn.textContent = '▶';
-        overlay.style.display = 'block';
+        if(playPauseBtn) playPauseBtn.textContent = '▶';
+        if(overlay) overlay.style.display = 'block';
         wrapper.classList.remove('video-is-playing');
       };
       video.onended = () => {
         if (globalEndMode === 0) {
           nextMedia(id, true);
         } else if (globalEndMode === 1) {
-          fadeOverlay.style.opacity = '1';
+          if(fadeOverlay) fadeOverlay.style.opacity = '1';
           setTimeout(() => {
             video.currentTime = 0;
-            fadeOverlay.style.opacity = '0';
+            if(fadeOverlay) fadeOverlay.style.opacity = '0';
             video.play();
           }, 500);
         } else if (globalEndMode === 2) {
           video.currentTime = 0;
         }
       };
-      const endModeBtn = wrapper.querySelector('.end-mode-btn');
-      if (endModeBtn) endModeBtn.onclick = () => {
+      
+      wrapper.querySelector('.end-mode-btn')?.addEventListener('click', () => {
         globalEndMode = (globalEndMode + 1) % endModesConfig.length;
         atualizarTodosOsBotoesDeModo();
-      };
-      const speedBtn = wrapper.querySelector('.speed-btn');
-      if (speedBtn) speedBtn.onclick = () => {
+      });
+      wrapper.querySelector('.speed-btn')?.addEventListener('click', (e) => {
+        const btn = e.currentTarget;
         video.playbackRate = video.playbackRate === 1 ? 2.0 : 1.0;
-        speedBtn.classList.toggle('active');
-        speedBtn.textContent = video.playbackRate === 1 ? '1x' : '2x';
-      };
-      const fullscreenBtn = wrapper.querySelector('.fullscreen-btn');
-      if (fullscreenBtn) fullscreenBtn.onclick = () => {
+        btn.classList.toggle('active');
+        btn.textContent = video.playbackRate === 1 ? '1x' : '2x';
+      });
+      wrapper.querySelector('.fullscreen-btn')?.addEventListener('click', () => {
         if (!document.fullscreenElement) {
-          // CORRIGIDO: Usando crases (template literals) corretamente
           container.requestFullscreen().catch(err => alert(`Erro: ${err.message}`));
         } else {
           document.exitFullscreen();
         }
-      };
-      if (playPauseBtn) playPauseBtn.onclick = () => void (video.paused ? video.play() : video.pause());
-      if (progressBar) progressBar.onclick = (e) => {
+      });
+      
+      if(playPauseBtn) playPauseBtn.onclick = () => void (video.paused ? video.play() : video.pause());
+      if(progressBar) progressBar.onclick = (e) => {
         const rect = progressBar.getBoundingClientRect();
         video.currentTime = ((e.clientX - rect.left) / rect.width) * video.duration;
       };
@@ -744,88 +742,136 @@
     container.addEventListener('mousemove', e => drag(e, id));
     container.addEventListener('mouseup', e => endDrag(e, id));
     container.addEventListener('mouseleave', e => endDrag(e, id));
-    container.addEventListener('touchstart', e => startDrag(e, id));
+    container.addEventListener('touchstart', e => startDrag(e, id), { passive: true });
     container.addEventListener('touchmove', e => drag(e, id));
     container.addEventListener('touchend', e => endDrag(e, id));
 
-    updateArrowVisibility(id);
-    updateSlideCounter(id);
-    
     const indexList = container.nextElementSibling;
     if (indexList && indexList.classList.contains('carousel-index')) {
-      const items = indexList.querySelectorAll('li');
-      items.forEach(item => {
-        item.addEventListener('click', () => {
-          const index = parseInt(item.dataset.index, 10);
-          showMedia(id, index);
-        });
+      indexList.querySelectorAll('li').forEach(item => {
+        item.addEventListener('click', () => showMedia(id, parseInt(item.dataset.index, 10)));
       });
     }
-    updateIndexHighlight(id);
-  }
-
-  function showMedia(id, index, forcePlay = false) {
-    const state = carrosseis.states[id];
-    if (!state || index === state.current) return;
-    const shouldBePlaying = state.isPlaying || forcePlay;
-    const oldVideo = state.wrappers[state.current].querySelector('video');
-    if (oldVideo) {
-      oldVideo.pause();
-      oldVideo.currentTime = 0;
-      const oldFade = oldVideo.closest('.media-wrapper').querySelector('.fade-overlay');
-      if (oldFade) oldFade.style.opacity = '0';
-    }
-    state.wrappers.forEach(w => w.classList.remove('active'));
-    state.wrappers[index].classList.add('active');
-    
-    state.current = index;
-    // CORRIGIDO: Usando crases (template literals) corretamente para a chave do localStorage
-    localStorage.setItem(`carouselState_${id}`, JSON.stringify({ current: index }));
     
     updateArrowVisibility(id);
     updateSlideCounter(id);
     updateIndexHighlight(id);
-    // CORRIGIDO: Usando crases (template literals) corretamente
-    document.getElementById(id).querySelector('.carousel').style.transform = `translateX(-${index * 100}%)`;
-    const newVideo = state.wrappers[index].querySelector('video');
-    if (shouldBePlaying && newVideo) {
-      newVideo.play();
-    } else if (shouldBePlaying && !newVideo) {
-      state.isPlaying = true;
-    }
   }
 
-  function endDrag(e, id) {
+  // Funções startDrag, drag, endDrag com a lógica de detecção de intenção (sem alterações)
+  function startDrag(e, id) {
+    const state = carrosseis.states[id];
+    state.isDragging = true;
+    state.isSwipeIntent = null;
+    state.startX = e.touches ? e.touches[0].clientX : e.clientX;
+    state.startY = e.touches ? e.touches[0].clientY : e.clientY;
+    state.carouselEl.style.transition = 'none';
+  }
+
+  function drag(e, id) {
     const state = carrosseis.states[id];
     if (!state.isDragging) return;
-    state.isDragging = false;
-    const endX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
-    const diff = endX - state.startX;
-    const carousel = document.getElementById(id).querySelector('.carousel');
-    carousel.style.transition = '';
-    if (diff > 50 && state.current > 0) {
-      prevMedia(id);
-    } else if (diff < -50 && state.current < state.wrappers.length - 1) {
-      nextMedia(id);
-    } else {
-      // CORRIGIDO: Usando crases (template literals) corretamente
-      carousel.style.transform = `translateX(-${state.current * 100}%)`;
-      const currentWrapper = state.wrappers[state.current];
-      const videoInCurrentSlide = currentWrapper.querySelector('video');
-      if (videoInCurrentSlide) {
-        videoInCurrentSlide.paused ? videoInCurrentSlide.play() : videoInCurrentSlide.pause();
+
+    const currentX = e.touches ? e.touches[0].clientX : e.clientX;
+    const currentY = e.touches ? e.touches[0].clientY : e.clientY;
+    const diffX = currentX - state.startX;
+    const diffY = currentY - state.startY;
+
+    if (state.isSwipeIntent === null) {
+      state.isSwipeIntent = Math.abs(diffY) > Math.abs(diffX) ? 'vertical' : 'horizontal';
+    }
+
+    if (state.isSwipeIntent === 'vertical') {
+      state.isDragging = false;
+      return;
+    }
+    
+    if (e.cancelable) e.preventDefault();
+    const newTransform = -state.current * state.container.offsetWidth + diffX;
+    state.carouselEl.style.transform = `translateX(${newTransform}px)`;
+  }
+
+function endDrag(e, id) {
+  const state = carrosseis.states[id];
+  if (!state.isDragging) return;
+
+  state.isDragging = false;
+  state.carouselEl.style.transition = '';
+
+  if (state.isSwipeIntent === 'vertical') return;
+
+  const endX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+  const diff = endX - state.startX;
+
+  // Se o movimento foi mínimo (é um clique/toque)
+  if (Math.abs(diff) < 10) {
+    const video = state.wrappers[state.current]?.querySelector('video');
+
+    if (video && !e.target.closest('.video-controls')) {
+      // AQUI ESTÁ A CORREÇÃO CRUCIAL:
+      // Previne o navegador de disparar um evento de "click" emulado após o toque.
+      // Isso impede que a função seja chamada uma segunda vez e desfaça a ação.
+      if (e.cancelable) {
         e.preventDefault();
       }
+      
+      video.paused ? video.play() : video.pause();
+    }
+    
+    // Apenas redefinimos a posição do carrossel.
+    state.carouselEl.style.transform = `translateX(-${state.current * 100}%)`;
+    return;
+  }
+
+  // Lógica de swipe para mudar de slide
+  if (diff > 50 && state.current > 0) {
+    prevMedia(id);
+  } else if (diff < -50 && state.current < state.wrappers.length - 1) {
+    nextMedia(id);
+  } else {
+    showMedia(id, state.current);
+  }
+}
+
+  // Funções showMedia, nextMedia, prevMedia (sem alterações)
+  function showMedia(id, index, forcePlay = false) {
+    const state = carrosseis.states[id];
+    if (!state) return;
+
+    const oldVideo = state.wrappers[state.current]?.querySelector('video');
+    if (oldVideo) oldVideo.pause();
+
+    if (index === state.current && !forcePlay) {
+      state.carouselEl.style.transform = `translateX(-${index * 100}%)`;
+      return;
+    }
+
+    const shouldBePlaying = state.isPlaying || forcePlay;
+    if (oldVideo) oldVideo.currentTime = 0;
+
+    state.wrappers.forEach(w => w.classList.remove('active'));
+    state.wrappers[index]?.classList.add('active');
+
+    state.current = index;
+    localStorage.setItem(`carouselState_${id}`, JSON.stringify({ current: index }));
+
+    state.carouselEl.style.transform = `translateX(-${index * 100}%)`;
+
+    updateArrowVisibility(id);
+    updateSlideCounter(id);
+    updateIndexHighlight(id);
+
+    const newVideo = state.wrappers[index]?.querySelector('video');
+    if (shouldBePlaying && newVideo) {
+      newVideo.play();
     }
   }
 
   function nextMedia(id, forcePlay = false) {
     const state = carrosseis.states[id];
-    if (state.current >= state.wrappers.length - 1) {
-      if (state.videos[state.current]) state.videos[state.current].pause();
-      return;
+    if (state.current < state.wrappers.length - 1) {
+      showMedia(id, state.current + 1, forcePlay);
     }
-    showMedia(id, state.current + 1, forcePlay);
   }
 
   function prevMedia(id) {
@@ -835,72 +881,42 @@
     }
   }
 
-  function startDrag(e, id) {
-    const state = carrosseis.states[id];
-    state.startX = e.touches ? e.touches[0].clientX : e.clientX;
-    state.isDragging = true;
-  }
-
-  function drag(e, id) {
-    const state = carrosseis.states[id];
-    if (!state.isDragging) return;
-    const currentX = e.touches ? e.touches[0].clientX : e.clientX;
-    const diff = currentX - state.startX;
-    const carousel = document.getElementById(id).querySelector('.carousel');
-    carousel.style.transition = 'none';
-    // CORRIGIDO: Usando crases (template literals) corretamente
-    carousel.style.transform = `translateX(calc(-${state.current * 100}% + ${diff}px))`;
-  }
-
   document.addEventListener('DOMContentLoaded', () => {
+    // CORREÇÃO: Restaurada a lógica completa do seletor de temas que foi omitida na resposta anterior.
     const colorOptions = document.querySelectorAll('.color-option');
     
-    // Função para definir o destaque da cor ativa
     const setActiveColor = (selectedColor) => {
       colorOptions.forEach(option => {
-        if (option.dataset.color === selectedColor) {
-          option.classList.add('active');
-        } else {
-          option.classList.remove('active');
-        }
+        option.classList.toggle('active', option.dataset.color === selectedColor);
       });
     };
 
-    // Carrega o tema e a cor salvos ao iniciar
-    const savedThemeColor = localStorage.getItem('appThemeColor') || '#a1a1a1'; // Padrão
-    const savedThemeMode = localStorage.getItem('appThemeMode') || 'light';   // Padrão
+    const savedThemeColor = localStorage.getItem('appThemeColor') || '#a1a1a1';
+    const savedThemeMode = localStorage.getItem('appThemeMode') || 'light';
 
     document.body.style.backgroundColor = savedThemeColor;
-    if (savedThemeMode === 'dark') {
-      document.body.classList.add('theme-is-dark');
-    } else {
-      document.body.classList.remove('theme-is-dark');
-    }
-    setActiveColor(savedThemeColor); // Destaca a cor salva
+    document.body.classList.toggle('theme-is-dark', savedThemeMode === 'dark');
+    setActiveColor(savedThemeColor);
 
-    // Inicializa os carrosséis e botões
     document.querySelectorAll('.carousel-container').forEach(c => initCarousel(c.id));
     atualizarTodosOsBotoesDeModo();
     
-    // Adiciona o evento de clique às opções de cor
     colorOptions.forEach(option => {
       option.addEventListener('click', () => {
         const newColor = option.dataset.color;
         
         document.body.style.backgroundColor = newColor;
         localStorage.setItem('appThemeColor', newColor);
-        setActiveColor(newColor); // Atualiza o destaque
+        setActiveColor(newColor);
 
-        if (isColorDark(newColor)) {
-          document.body.classList.add('theme-is-dark');
-          localStorage.setItem('appThemeMode', 'dark');
-        } else {
-          document.body.classList.remove('theme-is-dark');
-          localStorage.setItem('appThemeMode', 'light');
-        }
+        const isDark = isColorDark(newColor);
+        document.body.classList.toggle('theme-is-dark', isDark);
+        localStorage.setItem('appThemeMode', isDark ? 'dark' : 'light');
       });
     });
   });
 </script>
+
+
 </body>
 </html>
