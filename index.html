@@ -715,7 +715,7 @@ function resetInactivityTimer(id) {
         });
     });
 
-    videos.forEach(video => {
+ videos.forEach(video => {{
       const wrapper = video.closest('.media-wrapper');
       const playPauseBtn = wrapper.querySelector('.play-pause-btn');
       const progressBar = wrapper.querySelector('.progress-bar');
@@ -724,10 +724,23 @@ function resetInactivityTimer(id) {
       const fadeOverlay = wrapper.querySelector('.fade-overlay');
       const currentTimeEl = wrapper.querySelector('.current-time');
       const totalDurationEl = wrapper.querySelector('.total-duration');
-      
-      video.addEventListener('loadedmetadata', () => {
-        if (totalDurationEl) totalDurationEl.textContent = formatTime(video.duration);
-      });
+  
+  // 1. Criamos uma função reutilizável para atualizar a duração
+  const updateDurationDisplay = () => {{
+    // 2. Adicionamos uma verificação de segurança. Só atualiza se a duração for um número válido.
+    // isFinite() checa se o valor não é NaN, Infinity, ou -Infinity.
+    if (totalDurationEl && isFinite(video.duration)) {{
+      totalDurationEl.textContent = formatTime(video.duration);
+    }}
+  }}
+
+  // 3. Ouvimos múltiplos eventos para garantir a captura da duração.
+  // Qualquer um que chegar primeiro com a informação correta irá funcionar.
+  video.addEventListener('loadedmetadata', updateDurationDisplay);
+  video.addEventListener('durationchange', updateDurationDisplay);
+  video.addEventListener('canplay', updateDurationDisplay);
+
+  // ... resto do código do forEach (ontimeupdate, onplay, etc.)
       video.ontimeupdate = () => {
         if (progress) progress.style.width = `${(video.currentTime / video.duration) * 100}%`;
         if (currentTimeEl) currentTimeEl.textContent = formatTime(video.currentTime);
