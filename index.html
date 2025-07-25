@@ -304,8 +304,9 @@
   .color-palette {
     display: flex;
     gap: 5px;
-    background-color: rgba(128, 128, 128);
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: rgb(255, 255, 255);
+    border: 1px solid;
+    border-color: #000000;
     padding: 5px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     backdrop-filter: blur(5px);
@@ -315,7 +316,8 @@
     width: 10px;
     height: 10px;
     cursor: pointer;
-    border: 2px solid transparent;
+    border: 1px solid;
+    border-color: #000000;
     transition: transform 0.2s, border-color 0.2s;
   }
 
@@ -324,10 +326,9 @@
   }
 
   .color-option.active {
-    border-color: #ffffff;
-    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    transform: scale(1.5);
   }
-
+  
   /* --- 7. REGRAS DE ADAPTAÇÃO (HOVER E INATIVIDADE) --- */
   /* Remove a regra antiga de hover para ser controlada pelo JS */
   /* 
@@ -570,10 +571,12 @@
   <div class="theme-switcher">
   <div class="color-palette">
       <div class="color-option" style="background-color: #b9b9b9;" data-color="#c2c2c2"></div>
-      <div class="color-option" style="background-color: #cac2b4;" data-color="#cec6b7"></div>
-      <div class="color-option" style="background-color: #9ab6c9;" data-color="#97c7e7"></div>
-      <div class="color-option" style="background-color: #a9b9a6;" data-color="#a9b9a6"></div>
+      <div class="color-option" style="background-color: #ecdbc4;" data-color="#ecdbc4"></div>
+      <div class="color-option" style="background-color: #c6dff0;" data-color="#c6dff0"></div>
+      <div class="color-option" style="background-color: #ebc9e3;" data-color="#ebc9e3"></div>
+      <div class="color-option" style="background-color: #e7f3cc;" data-color="#e7f3cc"></div>
       <div class="color-option" style="background-color: #333333;" data-color="#333333"></div>
+      <div class="color-option" style="background-color: #000000;" data-color="#000000"></div>
     </div>
   </div>
 
