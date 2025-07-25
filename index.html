@@ -146,6 +146,7 @@
     padding: 3px 8px;
     border-radius: 10px;
     z-index: 6; 
+    transition: opacity 0.3s ease; /* Adicionada transição */
   }
   
   .play-overlay {
@@ -186,7 +187,6 @@
     align-items: center;
     gap: 10px;
     background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
-    opacity: 0;
     transition: opacity 0.3s ease;
   }
 
@@ -242,14 +242,15 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 32px; /* <-- Alterado para pixels */
+    font-size: 32px;
     color: white;
     background: rgba(0,0,0,0.5);
-    padding: 8px; /* <-- Também alterado para pixels para consistência */
+    padding: 8px;
     cursor: pointer;
     z-index: 10;
     user-select: none;
     border-radius: 8px;
+    transition: opacity 0.3s ease; /* Adicionada transição */
   }
   .prev { left: 10px; }
   .next { right: 10px; }
@@ -300,50 +301,67 @@
   }
   
   .color-palette {
-    /* Agora a paleta está sempre visível e é o componente principal */
     display: flex;
     gap: 5px;
     background-color: rgba(128, 128, 128);
     border: 1px solid rgba(0, 0, 0, 0.1);
     padding: 5px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    backdrop-filter: blur(5px); /* Efeito de vidro fosco, se o navegador suportar */
+    backdrop-filter: blur(5px);
   }
 
   .color-option {
-    width: 10px;   /* Quadrado */
-    height: 10px;  /* Quadrado */
+    width: 10px;
+    height: 10px;
     cursor: pointer;
-    border: 2px solid transparent; /* Borda invisível para manter o tamanho */
+    border: 2px solid transparent;
     transition: transform 0.2s, border-color 0.2s;
   }
 
   .color-option:hover {
-    transform: scale(1.1); /* Efeito de zoom sutil no hover */
+    transform: scale(1.1);
   }
 
-  /* Nova regra para destacar a cor ativa */
   .color-option.active {
-    border-color: #ffffff; /* Borda branca e grossa para indicar a seleção */
+    border-color: #ffffff;
     box-shadow: 0 0 5px rgba(0,0,0,0.5);
   }
 
-  /* --- 7. REGRAS DE ADAPTAÇÃO (HOVER) --- */
-  /* Aparição de controles em dispositivos com mouse */
+  /* --- 7. REGRAS DE ADAPTAÇÃO (HOVER E INATIVIDADE) --- */
+  /* Remove a regra antiga de hover para ser controlada pelo JS */
+  /* 
   @media (hover: hover) {
     .media-wrapper:hover .video-controls,
     .media-wrapper:hover .slide-title {
       opacity: 1;
     }
+  } 
+  */
+  
+  /* Controles aparecem quando o mouse está sobre o contêiner */
+  .carousel-container:hover .video-controls,
+  .carousel-container:hover .slide-title {
+      opacity: 1;
   }
 
-  /* Aparição de controles em dispositivos touch (durante a reprodução) */
-  @media (hover: none), (pointer: coarse) {
-    .media-wrapper.video-is-playing .video-controls,
-    .media-wrapper.video-is-playing .slide-title {
-      opacity: 1;
-    }
+  /* Garante que setas e o contador estejam sempre visíveis */
+.carousel-container .nav,
+.carousel-container .slide-counter {
+    opacity: 1;
+}
+  
+  /* Força o desaparecimento dos controles quando o usuário está inativo */
+  .carousel-container.user-inactive .video-controls,
+  .carousel-container.user-inactive .slide-title{
+    opacity: 0 !important; /* !important para garantir que sobreponha o :hover */
+    pointer-events: none;
   }
+
+  .carousel-container.user-inactive{
+    cursor: none;
+  }
+
+
 
     .carousel-header {
     width: min(700px, 90vw); 
@@ -354,7 +372,7 @@
   }
 
   .carousel-section h2 {
-    margin: 0; /* Remove a margem do h2 já que o header controla */
+    margin: 0;
     text-align: left;
   }
 
@@ -368,14 +386,13 @@
     font-weight: bold;
     border: 1px solid #ccc;
     transition: background-color 0.2s, color 0.2s;
-    white-space: nowrap; /* Impede que o texto quebre em duas linhas */
+    white-space: nowrap;
   }
 
   .download-btn:hover {
     background-color: #e0e0e0;
   }
 
-  /* Adaptação do botão para o tema escuro */
   .theme-is-dark .download-btn {
     background-color: #3a3a3a;
     color: #f0f0f0;
@@ -386,15 +403,12 @@
     background-color: #4a4a4a;
   }
 
-
-
-
-
-
+.carousel-container.no-click-after-drag .control-btn,
+.carousel-container.no-click-after-drag .progress-bar,
+.carousel-container.no-click-after-drag .play-pause-btn {
+  pointer-events: none;
+}
 </style>
-
-
-
 
 
 </head> 
@@ -404,7 +418,7 @@
   <section class="carousel-section">
     <div class="carousel-header">
       <h2>Parte1</h2>
-      <a href="midias/parte1/asdfasdf.zip" class="download-btn" download="asdfasdf.zip">Baixar Arquivos</a>
+      <a href="midias/parte1/asdfasdf.zip" class="download-btn" download="asdfasdf.zip">Baixar Arquivo</a>
     </div>
     <div class="carousel-container" id="parte10">
       <div class="carousel">
@@ -574,6 +588,9 @@
     { icon: '→|', title: 'Congelar no Final' }
   ];
 
+  // NOVA VARIÁVEL GLOBAL: Armazena o ID do carrossel ativo (onde o mouse está)
+  let activeCarouselId = null;
+
   function isColorDark(hexColor) {
     const hex = hexColor.replace('#', '');
     const r = parseInt(hex.substring(0, 2), 16);
@@ -589,7 +606,6 @@
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   }
 
-  // Funções de atualização (updateSlideCounter, updateArrowVisibility, etc.) permanecem as mesmas...
   function updateSlideCounter(id) {
     const state = carrosseis.states[id];
     if (!state) return;
@@ -632,6 +648,36 @@
     });
   }
 
+function resetInactivityTimer(id) {
+  const state = carrosseis.states[id];
+  if (!state) return;
+
+  // Mostra os controles imediatamente ao se tornar ativo
+  state.container.classList.remove('user-inactive');
+
+  // Limpa qualquer timer antigo para evitar sobreposição
+  clearTimeout(state.inactivityTimer);
+
+  // Cria um novo timer para esconder os controles após 3 segundos
+  state.inactivityTimer = setTimeout(() => {
+    // --- INÍCIO DA NOVA LÓGICA ---
+    const activeWrapper = state.wrappers[state.current];
+    if (!activeWrapper) return;
+
+    const video = activeWrapper.querySelector('video');
+    const image = activeWrapper.querySelector('img');
+
+    // CONDIÇÃO: Só esconde os controles se for um VÍDEO e ele estiver TOCANDO.
+    // Se for uma imagem ou se o vídeo estiver pausado, os controles permanecem visíveis.
+    if (video && !video.paused) {
+        state.container.classList.add('user-inactive');
+    } else if (image) {
+        // Se for uma imagem, não faz nada (mantém os controles visíveis)
+        return;
+    }
+    // --- FIM DA NOVA LÓGICA ---
+  }, 3000);
+}
 
   function initCarousel(id) {
     const container = document.getElementById(id);
@@ -651,7 +697,8 @@
       isDragging: false,
       startX: 0,
       startY: 0,
-      isSwipeIntent: null
+      isSwipeIntent: null,
+      inactivityTimer: null // NOVO: propriedade para guardar o timer
     };
 
     const savedState = JSON.parse(localStorage.getItem(`carouselState_${id}`)) || { current: 0 };
@@ -661,8 +708,6 @@
     wrappers[initialSlideIndex]?.classList.add('active');
     carouselEl.style.transform = `translateX(-${initialSlideIndex * 100}%)`;
 
-    // CORREÇÃO: Restaurada a lógica completa de stopPropagation para garantir que os cliques nos controles funcionem.
-    // Isso isola completamente os botões dos eventos de arrastar do contêiner.
     container.querySelectorAll('.nav, .video-controls').forEach(el => {
         ['mousedown', 'mouseup', 'touchstart', 'touchend'].forEach(evt => {
             el.addEventListener(evt, e => e.stopPropagation());
@@ -686,19 +731,32 @@
         if (progress) progress.style.width = `${(video.currentTime / video.duration) * 100}%`;
         if (currentTimeEl) currentTimeEl.textContent = formatTime(video.currentTime);
       };
-      video.onplay = () => {
-        carrosseis.states[id].isPlaying = true;
-        if(playPauseBtn) playPauseBtn.textContent = '❚❚';
-        if(overlay) overlay.style.display = 'none';
-        if(fadeOverlay) fadeOverlay.style.opacity = '0';
-        wrapper.classList.add('video-is-playing');
-      };
-      video.onpause = () => {
-        carrosseis.states[id].isPlaying = false;
-        if(playPauseBtn) playPauseBtn.textContent = '▶';
-        if(overlay) overlay.style.display = 'block';
-        wrapper.classList.remove('video-is-playing');
-      };
+video.onplay = () => {
+    carrosseis.states[id].isPlaying = true;
+    if(playPauseBtn) playPauseBtn.textContent = '❚❚';
+    if(overlay) overlay.style.display = 'none';
+    if(fadeOverlay) fadeOverlay.style.opacity = '0';
+    wrapper.classList.add('video-is-playing');
+
+    // --- NOVO: DEVOLVE O CONTROLE DA OPACIDADE PARA O CSS AO REPRODUZIR ---
+    const controls = wrapper.querySelector('.video-controls');
+    const title = wrapper.querySelector('.slide-title');
+    // Remover o estilo inline permite que as regras de :hover e .user-inactive do CSS voltem a funcionar
+    if (controls) controls.style.opacity = ''; 
+    if (title) title.style.opacity = '';
+};
+video.onpause = () => {
+    carrosseis.states[id].isPlaying = false;
+    if(playPauseBtn) playPauseBtn.textContent = '▶';
+    if(overlay) overlay.style.display = 'block';
+    wrapper.classList.remove('video-is-playing');
+
+    // --- NOVO: FORÇA A VISIBILIDADE DOS CONTROLES E TÍTULO AO PAUSAR ---
+    const controls = wrapper.querySelector('.video-controls');
+    const title = wrapper.querySelector('.slide-title');
+    if (controls) controls.style.opacity = '1';
+    if (title) title.style.opacity = '1';
+};
       video.onended = () => {
         if (globalEndMode === 0) {
           nextMedia(id, true);
@@ -747,6 +805,34 @@
     container.addEventListener('touchmove', e => drag(e, id));
     container.addEventListener('touchend', e => endDrag(e, id));
 
+    // --- EVENTOS MODIFICADOS PARA CONTROLE DE ATIVIDADE ---
+    const defineAsActive = () => {
+        activeCarouselId = id;    // Define este como o carrossel ativo para os atalhos
+        resetInactivityTimer(id); // Reseta o timer de inatividade
+    };
+
+    container.addEventListener('mouseover', defineAsActive);
+    container.addEventListener('mousemove', () => {
+        // Apenas reseta o timer, não precisa redefinir o ID toda hora
+        if (carrosseis.states[id]) resetInactivityTimer(id);
+    });
+    container.addEventListener('touchstart', () => {
+    if (carrosseis.states[id]) resetInactivityTimer(id);
+}, { passive: true });
+
+    container.addEventListener('mousedown', defineAsActive); // Também define como ativo ao clicar
+    
+    container.addEventListener('mouseleave', () => {
+        // NÃO limpa mais o activeCarouselId.
+        const state = carrosseis.states[id];
+        if (state) {
+            // Apenas aciona o timer uma última vez para ver se os controles devem sumir
+            resetInactivityTimer(id);
+        }
+    });
+    // --- FIM DOS EVENTOS MODIFICADOS ---
+    // --- FIM DOS NOVOS EVENTOS ---
+
     const indexList = container.nextElementSibling;
     if (indexList && indexList.classList.contains('carousel-index')) {
       indexList.querySelectorAll('li').forEach(item => {
@@ -757,18 +843,17 @@
     updateArrowVisibility(id);
     updateSlideCounter(id);
     updateIndexHighlight(id);
+    //container.classList.add('user-inactive'); // Inicia com os controles escondidos
   }
 
-  // Funções startDrag, drag, endDrag com a lógica de detecção de intenção (sem alterações)
-  function startDrag(e, id) {
-    const state = carrosseis.states[id];
-    state.isDragging = true;
-    state.isSwipeIntent = null;
-    state.startX = e.touches ? e.touches[0].clientX : e.clientX;
-    state.startY = e.touches ? e.touches[0].clientY : e.clientY;
-    state.carouselEl.style.transition = 'none';
-  }
-
+function startDrag(e, id) {
+  const state = carrosseis.states[id];
+  state.isDragging = true;
+  state.isSwipeIntent = null;
+  state.startX = e.touches ? e.touches[0].clientX : e.clientX;
+  state.startY = e.touches ? e.touches[0].clientY : e.clientY;
+  state.carouselEl.style.transition = 'none';
+}
   function drag(e, id) {
     const state = carrosseis.states[id];
     if (!state.isDragging) return;
@@ -804,37 +889,43 @@ function endDrag(e, id) {
   const endX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
   const diff = endX - state.startX;
 
-  // Se o movimento foi mínimo (é um clique/toque)
-  if (Math.abs(diff) < 10) {
-    const video = state.wrappers[state.current]?.querySelector('video');
+  if (Math.abs(diff) > 10) {
+    state.container.classList.add('no-click-after-drag');
+    setTimeout(() => {
+      state.container.classList.remove('no-click-after-drag');
+    }, 50);
 
+    if (diff > 50 && state.current > 0) {
+      prevMedia(id);
+    } else if (diff < -50 && state.current < state.wrappers.length - 1) {
+      nextMedia(id);
+    } else {
+      showMedia(id, state.current);
+    }
+  } 
+  else {
+    // --- INÍCIO DA LÓGICA DE CLIQUE/TOQUE UNIFICADA E CORRIGIDA ---
+    const activeWrapper = state.wrappers[state.current];
+    const video = activeWrapper?.querySelector('video');
+
+    // A ação só acontece se houver um vídeo e o alvo não for os próprios controles.
     if (video && !e.target.closest('.video-controls')) {
-      // AQUI ESTÁ A CORREÇÃO CRUCIAL:
-      // Previne o navegador de disparar um evento de "click" emulado após o toque.
-      // Isso impede que a função seja chamada uma segunda vez e desfaça a ação.
-      if (e.cancelable) {
-        e.preventDefault();
-      }
       
+      // A LINHA MAIS IMPORTANTE: Previne o "ghost click" que causa o
+      // comportamento de pause/play imediato em dispositivos móveis.
+      if (e.cancelable) e.preventDefault();
+      
+      // LÓGICA SIMPLIFICADA: Simplesmente alterna o estado do vídeo.
+      // Funciona da mesma forma para desktop (click) e mobile (tap).
       video.paused ? video.play() : video.pause();
     }
     
-    // Apenas redefinimos a posição do carrossel.
+    // Garante que o carrossel se ajuste de volta à posição correta.
     state.carouselEl.style.transform = `translateX(-${state.current * 100}%)`;
-    return;
-  }
-
-  // Lógica de swipe para mudar de slide
-  if (diff > 50 && state.current > 0) {
-    prevMedia(id);
-  } else if (diff < -50 && state.current < state.wrappers.length - 1) {
-    nextMedia(id);
-  } else {
-    showMedia(id, state.current);
+    // --- FIM DA LÓGICA CORRIGIDA ---
   }
 }
 
-  // Funções showMedia, nextMedia, prevMedia (sem alterações)
   function showMedia(id, index, forcePlay = false) {
     const state = carrosseis.states[id];
     if (!state) return;
@@ -883,7 +974,6 @@ function endDrag(e, id) {
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    // CORREÇÃO: Restaurada a lógica completa do seletor de temas que foi omitida na resposta anterior.
     const colorOptions = document.querySelectorAll('.color-option');
     
     const setActiveColor = (selectedColor) => {
@@ -915,6 +1005,33 @@ function endDrag(e, id) {
         localStorage.setItem('appThemeMode', isDark ? 'dark' : 'light');
       });
     });
+
+    // --- NOVO LISTENER GLOBAL DE TECLADO ---
+    document.addEventListener('keydown', (e) => {
+        // Se nenhum carrossel estiver ativo (mouse em cima), não faz nada
+        if (!activeCarouselId) return;
+
+        switch (e.key) {
+            case ' ':
+                // Previne o comportamento padrão da barra de espaço (rolar a página)
+                e.preventDefault();
+                const state = carrosseis.states[activeCarouselId];
+                const video = state.wrappers[state.current]?.querySelector('video');
+                if (video) {
+                    video.paused ? video.play() : video.pause();
+                }
+                break;
+            case 'ArrowRight':
+                e.preventDefault();
+                nextMedia(activeCarouselId);
+                break;
+            case 'ArrowLeft':
+                e.preventDefault();
+                prevMedia(activeCarouselId);
+                break;
+        }
+    });
+
   });
 </script>
 
