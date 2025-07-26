@@ -937,8 +937,7 @@ sdajf asdjf nhiosadnfoi auhowiuen odjanajdfndj osadfadfsd ag dsf ndfgnbc dfg ndf
     }, 3000);
   }
 
-  // VERSÃO NOVA E COMPLETA DA FUNÇÃO - SUBSTITUA A ANTIGA
-  // VERSÃO FINAL E COMPLETA - SUBSTITUA TUDO POR ISTO
+  // VERSÃO CORRIGIDA FINAL - SUBSTITUA SUA FUNÇÃO POR ESTA
   function initCarousel(id) {
     const container = document.getElementById(id);
     if (!container) return;
@@ -969,7 +968,7 @@ sdajf asdjf nhiosadnfoi auhowiuen odjanajdfndj osadfadfsd ag dsf ndfgnbc dfg ndf
     const startOfToday = new Date().setHours(0, 0, 0, 0);
 
     wrappers.forEach(wrapper => {
-      // --- LÓGICA DA DESCRIÇÃO (Já estava correta) ---
+      // --- LÓGICA DA DESCRIÇÃO ---
       const descIconBtn = wrapper.querySelector('.description-icon-btn');
       const descPopup = wrapper.querySelector('.description-popup');
       const mediaId = wrapper.dataset.mediaId;
@@ -985,21 +984,19 @@ sdajf asdjf nhiosadnfoi auhowiuen odjanajdfndj osadfadfsd ag dsf ndfgnbc dfg ndf
         descIconBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           descPopup.classList.toggle('active');
-
           if (mediaId) {
             descIconBtn.classList.remove('needs-attention');
             viewedDescriptions[mediaId] = Date.now(); 
             localStorage.setItem('viewedDescriptions', JSON.stringify(viewedDescriptions));
           }
         });
-        
         descPopup.addEventListener('click', (e) => e.stopPropagation());
         descPopup.querySelector('.description-close-btn').addEventListener('click', () => {
           descPopup.classList.remove('active');
         });
       }
 
-      // --- LÓGICA DO VÍDEO (A parte que faltava foi restaurada) ---
+      // --- LÓGICA DO VÍDEO E CONTROLES ---
       const video = wrapper.querySelector('video');
       if (!video) return; 
 
@@ -1010,27 +1007,70 @@ sdajf asdjf nhiosadnfoi auhowiuen odjanajdfndj osadfadfsd ag dsf ndfgnbc dfg ndf
       const volumeBtn = wrapper.querySelector('.volume-btn');
       const volumeSlider = wrapper.querySelector('.volume-slider');
       
+      // --- [BLOCO RESTAURADO] LÓGICA DO SOM, VELOCIDADE, ETC. ---
       playPauseBtn?.addEventListener('click', () => { video.paused ? video.play() : video.pause(); });
+      
       progressBar?.addEventListener('click', (e) => {
         const rect = progressBar.getBoundingClientRect();
         video.currentTime = ((e.clientX - rect.left) / rect.width) * video.duration;
       });
-
-      // ... Lógica dos outros botões que já estava funcionando ...
+      
       wrapper.querySelector('.end-mode-btn')?.addEventListener('click', () => {
         globalEndMode = (globalEndMode + 1) % endModesConfig.length;
         atualizarTodosOsBotoesDeModo();
       });
-      // ...
 
-      // --- [BLOCO RESTAURADO] LÓGICA DE PLAY/PAUSE E ÍCONE CENTRAL ---
+      wrapper.querySelector('.speed-btn')?.addEventListener('click', (e) => {
+        video.playbackRate = video.playbackRate === 1 ? 2.0 : 1.0;
+        e.currentTarget.classList.toggle('active');
+        e.currentTarget.textContent = video.playbackRate === 1 ? '1x' : '2x';
+      });
+
+      wrapper.querySelector('.fullscreen-btn')?.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          container.requestFullscreen().catch(err => alert(`Erro: ${err.message}`));
+        } else {
+          document.exitFullscreen();
+        }
+      });
+      
+      if (volumeBtn && volumeSlider) {
+        let lastVolume = 1;
+        const volumeIcon = volumeBtn.querySelector('img');
+        const updateVolumeUI = () => {
+          if (video.muted || video.volume === 0) {
+            if(volumeIcon) volumeIcon.src = ICONOS.volume_off;
+            volumeSlider.value = 0;
+          } else {
+            if(volumeIcon) volumeIcon.src = ICONOS.volume_on;
+            volumeSlider.value = video.volume;
+          }
+        };
+        volumeSlider.addEventListener('input', e => {
+          video.muted = false;
+          video.volume = e.target.value;
+        });
+        volumeBtn.addEventListener('click', () => {
+          if (video.muted) {
+            video.muted = false;
+            video.volume = lastVolume > 0 ? lastVolume : 1;
+          } else {
+            lastVolume = video.volume;
+            video.muted = true;
+          }
+        });
+        video.addEventListener('volumechange', updateVolumeUI);
+        updateVolumeUI();
+      }
+      // --- FIM DO BLOCO RESTAURADO ---
+
       const playPauseIcon = playPauseBtn.querySelector('img');
-      const playOverlay = wrapper.querySelector('.play-overlay'); // Seleciona o contêiner do ícone
+      const playOverlay = wrapper.querySelector('.play-overlay');
 
       video.addEventListener('play', () => {
         carrosseis.states[id].isPlaying = true;
         if(playPauseIcon) playPauseIcon.src = ICONOS.pause;
-        if(playOverlay) playOverlay.style.display = 'none'; // Esconde o ícone central
+        if(playOverlay) playOverlay.style.display = 'none';
         wrapper.classList.add('video-is-playing');
         wrapper.querySelector('.video-controls').style.opacity = '';
         wrapper.querySelector('.slide-title').style.opacity = '';
@@ -1039,12 +1079,11 @@ sdajf asdjf nhiosadnfoi auhowiuen odjanajdfndj osadfadfsd ag dsf ndfgnbc dfg ndf
       video.addEventListener('pause', () => {
         carrosseis.states[id].isPlaying = false;
         if(playPauseIcon) playPauseIcon.src = ICONOS.play;
-        if(playOverlay) playOverlay.style.display = 'block'; // Mostra o ícone central
+        if(playOverlay) playOverlay.style.display = 'block';
         wrapper.classList.remove('video-is-playing');
         wrapper.querySelector('.video-controls').style.opacity = '1';
         wrapper.querySelector('.slide-title').style.opacity = '1';
       });
-      // --- FIM DO BLOCO RESTAURADO ---
 
       const updateDurationDisplay = () => {
         if (totalDurationEl && isFinite(video.duration)) {
@@ -1080,7 +1119,7 @@ sdajf asdjf nhiosadnfoi auhowiuen odjanajdfndj osadfadfsd ag dsf ndfgnbc dfg ndf
       }
     });
 
-    // --- LÓGICA DE ARRASTAR (Já estava correta) ---
+    // --- LÓGICA DE ARRASTAR ---
     container.addEventListener('mousedown', e => startDrag(e, id));
     container.addEventListener('mousemove', e => drag(e, id));
     container.addEventListener('mouseup', e => endDrag(e, id));
