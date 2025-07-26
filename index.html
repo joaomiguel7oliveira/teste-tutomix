@@ -135,20 +135,6 @@
     transition: opacity 0.3s ease;
   }
 
-  .slide-counter {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    color: white;
-    font-size: 14px;
-    user-select: none;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-    background-color: rgba(0, 0, 0, 0.4);
-    padding: 3px 8px;
-    border-radius: 10px;
-    z-index: 6; 
-    transition: opacity 0.3s ease; /* Adicionada transição */
-  }
   
   .play-overlay {
     position: absolute;
@@ -328,7 +314,7 @@
   .color-option.active {
     transform: scale(1.5);
   }
-  
+
   /* --- 7. REGRAS DE ADAPTAÇÃO (HOVER E INATIVIDADE) --- */
   /* Remove a regra antiga de hover para ser controlada pelo JS */
   /* 
@@ -336,7 +322,7 @@
     .media-wrapper:hover .video-controls,
     .media-wrapper:hover .slide-title {
       opacity: 1;
-    }
+      }
   } 
   */
   
@@ -410,6 +396,193 @@
 .carousel-container.no-click-after-drag .play-pause-btn {
   pointer-events: none;
 }
+
+/* Interação com SOM*/
+
+/* 1. O Contêiner Pai */
+.volume-container {
+  display: flex;
+  align-items: center;
+}
+
+.volume-slider {
+  width: 0; /* Começa com largura zero */
+  opacity: 0;
+  pointer-events: none;
+  margin-left: 0;
+  transition: width 0.3s ease, opacity 0.2s ease, margin-left 0.3s ease;
+  
+  /* Estilos visuais (semelhantes aos de antes) */
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.4);
+  height: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* 3. A Lógica de Aparição */
+.volume-container:hover .volume-slider {
+  width: 40px; /* Expande para a largura total */
+  opacity: 1;
+  pointer-events: auto;
+  margin-left: 10px; /* Cria um espaço ao aparecer */
+}
+
+/* Esconde as partes do "polegar" quando o slider está recolhido */
+.volume-slider::-webkit-slider-thumb {
+  opacity: 0;
+  transition: opacity 0.2s ease 0.1s; /* Aparece com um pequeno atraso */
+}
+.volume-slider::-moz-range-thumb {
+  opacity: 0;
+  transition: opacity 0.2s ease 0.1s;
+}
+
+/* Mostra o "polegar" quando o slider está expandido */
+.volume-container:hover .volume-slider::-webkit-slider-thumb {
+  opacity: 1;
+}
+.volume-container:hover .volume-slider::-moz-range-thumb {
+  opacity: 1;
+}
+
+/* --\-- */
+
+/* REMOVA o posicionamento absoluto do contador, pois o pai agora cuida disso */
+.slide-counter {
+  /* Adicione estas 3 linhas de volta
+  position: absolute; */
+  top: 10px;
+  right: 15px;
+
+  color: white;
+  font-size: 14px;
+  user-select: none;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+  background-color: rgba(0, 0, 0, 0.4);
+  padding: 3px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+  
+  /* A propriedade 'order' pode ser removida se existir */
+}
+
+
+/* Estilos para o contêiner no canto superior direito */
+.top-right-controls {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 12px;
+}
+.slide-counter {
+  position: static; /* Remove o posicionamento antigo */
+  white-space: nowrap;
+  order: -1; /* Força o ícone a aparecer sempre à esquerda */
+}
+.description-icon-btn {
+  font-size: 20px;
+  opacity: 1;
+  text-shadow: 0 5px 5px rgba(0,0,0,0.7);
+}
+
+/* Estilos para o Popup de Descrição */
+.description-popup {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  
+  width: 80%;
+  max-width: 600px;
+  max-height: 70%;
+  
+  background-color: rgba(240, 240, 240, 0.7);
+  color: #333;
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+  
+  display: none; /* Escondido por padrão */
+}
+.description-popup.active {
+  display: flex; /* Mostra o popup quando a classe 'active' é adicionada */
+}
+
+/* Estilos para o conteúdo e o scroll */
+.description-content {
+  padding: 25px;
+  padding-bottom: 15px;
+  overflow-y: auto; /* Habilita o scroll vertical se o texto for longo */
+  white-space: pre-wrap; /* Respeita as quebras de linha do arquivo .txt */
+  font-family: 'roboto serif', serif;
+  font-size: 16px;
+  text-shadow: none;
+  line-height: 1.6;
+  box-shadow: 0 5px 5px rgba(0,0,0,0.7);
+  
+}
+
+/* BARRA DE ROLAGEM */
+
+/* --- ESTILOS PARA A BARRA DE ROLAGEM DO POPUP (VERSÃO DE ALTA ESPECIFICIDADE) --- */
+
+/* Para Firefox */
+.description-popup .description-content {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.5) rgba(0, 0, 0, 0.1);
+}
+
+/* Para Chrome, Safari, Edge, etc. */
+.description-popup .description-content::-webkit-scrollbar {
+  width: 12px; /* Um pouco mais largo para facilitar o clique */
+}
+
+.description-popup .description-content::-webkit-scrollbar-track {
+  background: transparent; /* Deixa a pista de fundo invisível */
+  /* A margem superior é aplicada aqui, na pista */
+  margin-top: 35px; 
+}
+
+.description-popup .description-content::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 20px;
+  /* Este truque cria um "padding" visual ao redor do polegar */
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+.description-popup .description-content::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* --//-- */
+
+/* Estilização opcional da barra de rolagem (para Firefox e navegadores mais recentes) */
+.description-content {
+  scrollbar-width: thin; /* 'auto', 'thin' ou 'none' */
+  scrollbar-color: #a0a0a0 #e0e0e0; /* Cor da alça e do trilho */
+}
+
+/* Estilos para o botão de fechar */
+.description-close-btn {
+  position: absolute;
+  top: 5px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #555;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
 </style>
 
 
@@ -426,51 +599,109 @@
       <div class="carousel">
         
         <div class="media-wrapper">
+          
+          <div class="description-popup">
+            <div class="description-content">sdajf asdjf nhiosadnfoi auhowiuen odjanajdfndj osadfadfsd ag dsf ndfgnbc dfg ndfr gh dfg hdf hgsdf bsdfvbsd fvgsadfg asd f asdfa sd fasdf as dfasdfaswdgv erbvs frhtryh ert hert g dfg dfsdvsdfhrwtehrt hgfh fd gsdfg we4rg fdsfdsv fgs ergh dfgsdf gsdfger gdf vbdsvf bhftsd j uj uyko lyul u jmhf jm fgdhe sf qwe rqw e.
+sdajf asdjf nhiosadnfoi auhowiuen odjanajdfndj osadfadfsd ag dsf ndfgnbc dfg ndfr gh dfg hdf hgsdf bsdfvbsd fvgsadfg asd f asdfa sd fasdf as dfasdfaswdgv erbvs frhtryh ert hert g dfg dfsdvsdfhrwtehrt hgfh fd gsdfg we4rg fdsfdsv fgs ergh dfgsdf gsdfger gdf vbdsvf bhftsd j uj uyko lyul u jmhf jm fgdhe sf qwe rqw e.
+sdajf asdjf nhiosadnfoi auhowiuen odjanajdfndj osadfadfsd ag dsf ndfgnbc dfg ndfr gh dfg hdf hgsdf bsdfvbsd fvgsadfg asd f asdfa sd fasdf as dfasdfaswdgv erbvs frhtryh ert hert g dfg dfsdvsdfhrwtehrt hgfh fd gsdfg we4rg fdsfdsv fgs ergh dfgsdf gsdfger gdf vbdsvf bhftsd j uj uyko lyul u jmhf jm fgdhe sf qwe rqw e.
+sdajf asdjf nhiosadnfoi auhowiuen odjanajdfndj osadfadfsd ag dsf ndfgnbc dfg ndfr gh dfg hdf hgsdf bsdfvbsd fvgsadfg asd f asdfa sd fasdf as dfasdfaswdgv erbvs frhtryh ert hert g dfg dfsdvsdfhrwtehrt hgfh fd gsdfg we4rg fdsfdsv fgs ergh dfgsdf gsdfger gdf vbdsvf bhftsd j uj uyko lyul u jmhf jm fgdhe sf qwe rqw e.
+</div>
+            <button class="description-close-btn">×</button>
+          </div>
           <div class="slide-title">1</div>
-          <video src="midias/parte1/1.mp4" muted preload="metadata"></video>
+          <video src="midias/parte1/1.mp4" preload="metadata"></video>
           <div class="play-overlay">▶</div>
           <div class="fade-overlay"></div>
-          <div class="slide-counter"></div>
+          <div class="top-right-controls">
+            
+            <button class="control-btn description-icon-btn" title="Ver Descrição">💬</button>
+            <div class="slide-counter"></div>
+          </div>
           <div class="video-controls">
             <button class="play-pause-btn">▶</button>
             <div class="time-display">
               <span class="current-time">00:00</span> / <span class="total-duration">00:00</span>
             </div>
             <div class="progress-bar"><div class="progress"></div></div>
+            <div class="volume-container">
+              <button class="control-btn volume-btn" title="Silenciar">🔊</button>
+              <input type="range" class="volume-slider" min="0" max="1" step="0.05" value="1">
+            </div>
             <button class="control-btn end-mode-btn" title="Próximo Automático">⏭️</button>
             <button class="control-btn speed-btn" title="Velocidade (1x)">1x</button>
             <button class="control-btn fullscreen-btn" title="Tela Inteira">🔳</button>
           </div>
         </div>
         <div class="media-wrapper">
+          
           <div class="slide-title">2</div>
-          <video src="midias/parte1/2.mp4" muted preload="metadata"></video>
+          <video src="midias/parte1/2.mp4" preload="metadata"></video>
           <div class="play-overlay">▶</div>
           <div class="fade-overlay"></div>
-          <div class="slide-counter"></div>
+          <div class="top-right-controls">
+            
+            <div class="slide-counter"></div>
+          </div>
           <div class="video-controls">
             <button class="play-pause-btn">▶</button>
             <div class="time-display">
               <span class="current-time">00:00</span> / <span class="total-duration">00:00</span>
             </div>
             <div class="progress-bar"><div class="progress"></div></div>
+            <div class="volume-container">
+              <button class="control-btn volume-btn" title="Silenciar">🔊</button>
+              <input type="range" class="volume-slider" min="0" max="1" step="0.05" value="1">
+            </div>
             <button class="control-btn end-mode-btn" title="Próximo Automático">⏭️</button>
             <button class="control-btn speed-btn" title="Velocidade (1x)">1x</button>
             <button class="control-btn fullscreen-btn" title="Tela Inteira">🔳</button>
           </div>
         </div>
         <div class="media-wrapper">
-          <div class="slide-title">3</div>
-          <video src="midias/parte1/3.mp4" muted preload="metadata"></video>
+          
+          <div class="slide-title">2025 07 17 13 15 29</div>
+          <video src="midias/parte1/2025-07-17 13-15-29.mp4" preload="metadata"></video>
           <div class="play-overlay">▶</div>
           <div class="fade-overlay"></div>
-          <div class="slide-counter"></div>
+          <div class="top-right-controls">
+            
+            <div class="slide-counter"></div>
+          </div>
           <div class="video-controls">
             <button class="play-pause-btn">▶</button>
             <div class="time-display">
               <span class="current-time">00:00</span> / <span class="total-duration">00:00</span>
             </div>
             <div class="progress-bar"><div class="progress"></div></div>
+            <div class="volume-container">
+              <button class="control-btn volume-btn" title="Silenciar">🔊</button>
+              <input type="range" class="volume-slider" min="0" max="1" step="0.05" value="1">
+            </div>
+            <button class="control-btn end-mode-btn" title="Próximo Automático">⏭️</button>
+            <button class="control-btn speed-btn" title="Velocidade (1x)">1x</button>
+            <button class="control-btn fullscreen-btn" title="Tela Inteira">🔳</button>
+          </div>
+        </div>
+        <div class="media-wrapper">
+          
+          <div class="slide-title">3</div>
+          <video src="midias/parte1/3.mp4" preload="metadata"></video>
+          <div class="play-overlay">▶</div>
+          <div class="fade-overlay"></div>
+          <div class="top-right-controls">
+            
+            <div class="slide-counter"></div>
+          </div>
+          <div class="video-controls">
+            <button class="play-pause-btn">▶</button>
+            <div class="time-display">
+              <span class="current-time">00:00</span> / <span class="total-duration">00:00</span>
+            </div>
+            <div class="progress-bar"><div class="progress"></div></div>
+            <div class="volume-container">
+              <button class="control-btn volume-btn" title="Silenciar">🔊</button>
+              <input type="range" class="volume-slider" min="0" max="1" step="0.05" value="1">
+            </div>
             <button class="control-btn end-mode-btn" title="Próximo Automático">⏭️</button>
             <button class="control-btn speed-btn" title="Velocidade (1x)">1x</button>
             <button class="control-btn fullscreen-btn" title="Tela Inteira">🔳</button>
@@ -480,7 +711,7 @@
       <div class="nav prev" onclick="prevMedia('parte10')">⟨</div>
       <div class="nav next" onclick="nextMedia('parte10')">⟩</div>
     </div>
-    <ul class="carousel-index"><li data-index="0">1</li><li data-index="1">2</li><li data-index="2">3</li></ul>
+    <ul class="carousel-index"><li data-index="0">1</li><li data-index="1">2</li><li data-index="2">2025 07 17 13 15 29</li><li data-index="3">3</li></ul>
   </section>
   <section class="carousel-section">
     <div class="carousel-header">
@@ -491,74 +722,116 @@
       <div class="carousel">
         
         <div class="media-wrapper">
+          
           <div class="slide-title">5</div>
-          <video src="midias/parte2/5.mp4" muted preload="metadata"></video>
+          <video src="midias/parte2/5.mp4" preload="metadata"></video>
           <div class="play-overlay">▶</div>
           <div class="fade-overlay"></div>
-          <div class="slide-counter"></div>
+          <div class="top-right-controls">
+            
+            <div class="slide-counter"></div>
+          </div>
           <div class="video-controls">
             <button class="play-pause-btn">▶</button>
             <div class="time-display">
               <span class="current-time">00:00</span> / <span class="total-duration">00:00</span>
             </div>
             <div class="progress-bar"><div class="progress"></div></div>
+            <div class="volume-container">
+              <button class="control-btn volume-btn" title="Silenciar">🔊</button>
+              <input type="range" class="volume-slider" min="0" max="1" step="0.05" value="1">
+            </div>
             <button class="control-btn end-mode-btn" title="Próximo Automático">⏭️</button>
             <button class="control-btn speed-btn" title="Velocidade (1x)">1x</button>
             <button class="control-btn fullscreen-btn" title="Tela Inteira">🔳</button>
           </div>
         </div>
         <div class="media-wrapper">
+          
           <div class="slide-title">6 Embalse Guatapé, Colômbia</div>
           <img src="midias/parte2/6 Embalse Guatapé, Colômbia.jpg" draggable="false"/>
-          <div class="slide-counter"></div>
+
+          <div class="top-right-controls">
+            
+            <div class="slide-counter"></div>
+          </div>
+
           <div class="video-controls image-controls">
           </div>
         </div>
         <div class="media-wrapper">
+          
           <div class="slide-title">7 Dieserto del Diablo, Argentina</div>
           <img src="midias/parte2/7 Dieserto del Diablo, Argentina.jpeg" draggable="false"/>
-          <div class="slide-counter"></div>
+
+          <div class="top-right-controls">
+            
+            <div class="slide-counter"></div>
+          </div>
+
           <div class="video-controls image-controls">
           </div>
         </div>
         <div class="media-wrapper">
+          
           <div class="slide-title">8</div>
-          <video src="midias/parte2/8.mp4" muted preload="metadata"></video>
+          <video src="midias/parte2/8.mp4" preload="metadata"></video>
           <div class="play-overlay">▶</div>
           <div class="fade-overlay"></div>
-          <div class="slide-counter"></div>
+          <div class="top-right-controls">
+            
+            <div class="slide-counter"></div>
+          </div>
           <div class="video-controls">
             <button class="play-pause-btn">▶</button>
             <div class="time-display">
               <span class="current-time">00:00</span> / <span class="total-duration">00:00</span>
             </div>
             <div class="progress-bar"><div class="progress"></div></div>
+            <div class="volume-container">
+              <button class="control-btn volume-btn" title="Silenciar">🔊</button>
+              <input type="range" class="volume-slider" min="0" max="1" step="0.05" value="1">
+            </div>
             <button class="control-btn end-mode-btn" title="Próximo Automático">⏭️</button>
             <button class="control-btn speed-btn" title="Velocidade (1x)">1x</button>
             <button class="control-btn fullscreen-btn" title="Tela Inteira">🔳</button>
           </div>
         </div>
         <div class="media-wrapper">
+          
           <div class="slide-title">8b</div>
-          <video src="midias/parte2/8b.mp4" muted preload="metadata"></video>
+          <video src="midias/parte2/8b.mp4" preload="metadata"></video>
           <div class="play-overlay">▶</div>
           <div class="fade-overlay"></div>
-          <div class="slide-counter"></div>
+          <div class="top-right-controls">
+            
+            <div class="slide-counter"></div>
+          </div>
           <div class="video-controls">
             <button class="play-pause-btn">▶</button>
             <div class="time-display">
               <span class="current-time">00:00</span> / <span class="total-duration">00:00</span>
             </div>
             <div class="progress-bar"><div class="progress"></div></div>
+            <div class="volume-container">
+              <button class="control-btn volume-btn" title="Silenciar">🔊</button>
+              <input type="range" class="volume-slider" min="0" max="1" step="0.05" value="1">
+            </div>
             <button class="control-btn end-mode-btn" title="Próximo Automático">⏭️</button>
             <button class="control-btn speed-btn" title="Velocidade (1x)">1x</button>
             <button class="control-btn fullscreen-btn" title="Tela Inteira">🔳</button>
           </div>
         </div>
         <div class="media-wrapper">
+          
           <div class="slide-title">9 Lago Maroon Bells Colorado</div>
           <img src="midias/parte2/9 Lago Maroon Bells Colorado.jpeg" draggable="false"/>
-          <div class="slide-counter"></div>
+
+          <div class="top-right-controls">
+            
+            <div class="slide-counter"></div>
+          </div>
+
           <div class="video-controls image-controls">
           </div>
         </div>
@@ -575,8 +848,8 @@
       <div class="color-option" style="background-color: #c6dff0;" data-color="#c6dff0"></div>
       <div class="color-option" style="background-color: #ebc9e3;" data-color="#ebc9e3"></div>
       <div class="color-option" style="background-color: #e7f3cc;" data-color="#e7f3cc"></div>
-      <div class="color-option" style="background-color: #333333;" data-color="#333333"></div>
       <div class="color-option" style="background-color: #000000;" data-color="#000000"></div>
+      <div class="color-option" style="background-color: #333333;" data-color="#333333"></div>
     </div>
   </div>
 
@@ -591,8 +864,6 @@
     { icon: '🔁', title: 'Repetir Vídeo' },
     { icon: '→|', title: 'Congelar no Final' }
   ];
-
-  // NOVA VARIÁVEL GLOBAL: Armazena o ID do carrossel ativo (onde o mouse está)
   let activeCarouselId = null;
 
   function isColorDark(hexColor) {
@@ -628,7 +899,6 @@
     const nextArrow = container.querySelector('.nav.next');
     const totalSlides = wrappers.length;
     const isSingleSlide = totalSlides <= 1;
-
     prevArrow.style.display = isSingleSlide || current === 0 ? 'none' : 'block';
     nextArrow.style.display = isSingleSlide || current === totalSlides - 1 ? 'none' : 'block';
   }
@@ -652,36 +922,18 @@
     });
   }
 
-function resetInactivityTimer(id) {
-  const state = carrosseis.states[id];
-  if (!state) return;
-
-  // Mostra os controles imediatamente ao se tornar ativo
-  state.container.classList.remove('user-inactive');
-
-  // Limpa qualquer timer antigo para evitar sobreposição
-  clearTimeout(state.inactivityTimer);
-
-  // Cria um novo timer para esconder os controles após 3 segundos
-  state.inactivityTimer = setTimeout(() => {
-    // --- INÍCIO DA NOVA LÓGICA ---
-    const activeWrapper = state.wrappers[state.current];
-    if (!activeWrapper) return;
-
-    const video = activeWrapper.querySelector('video');
-    const image = activeWrapper.querySelector('img');
-
-    // CONDIÇÃO: Só esconde os controles se for um VÍDEO e ele estiver TOCANDO.
-    // Se for uma imagem ou se o vídeo estiver pausado, os controles permanecem visíveis.
-    if (video && !video.paused) {
+  function resetInactivityTimer(id) {
+    const state = carrosseis.states[id];
+    if (!state) return;
+    state.container.classList.remove('user-inactive');
+    clearTimeout(state.inactivityTimer);
+    state.inactivityTimer = setTimeout(() => {
+      const video = state.wrappers[state.current]?.querySelector('video');
+      if (video && !video.paused) {
         state.container.classList.add('user-inactive');
-    } else if (image) {
-        // Se for uma imagem, não faz nada (mantém os controles visíveis)
-        return;
-    }
-    // --- FIM DA NOVA LÓGICA ---
-  }, 3000);
-}
+      }
+    }, 3000);
+  }
 
   function initCarousel(id) {
     const container = document.getElementById(id);
@@ -689,20 +941,10 @@ function resetInactivityTimer(id) {
 
     const carouselEl = container.querySelector('.carousel');
     const wrappers = Array.from(container.querySelectorAll('.media-wrapper'));
-    const videos = container.querySelectorAll('video');
-
+    
     carrosseis.states[id] = {
-      container,
-      carouselEl,
-      wrappers,
-      videos,
-      current: 0,
-      isPlaying: false,
-      isDragging: false,
-      startX: 0,
-      startY: 0,
-      isSwipeIntent: null,
-      inactivityTimer: null // NOVO: propriedade para guardar o timer
+      container, carouselEl, wrappers, current: 0, isPlaying: false,
+      isDragging: false, startX: 0, startY: 0, isSwipeIntent: null, inactivityTimer: null
     };
 
     const savedState = JSON.parse(localStorage.getItem(`carouselState_${id}`)) || { current: 0 };
@@ -712,94 +954,73 @@ function resetInactivityTimer(id) {
     wrappers[initialSlideIndex]?.classList.add('active');
     carouselEl.style.transform = `translateX(-${initialSlideIndex * 100}%)`;
 
-    container.querySelectorAll('.nav, .video-controls').forEach(el => {
-        ['mousedown', 'mouseup', 'touchstart', 'touchend'].forEach(evt => {
+    // **CORREÇÃO DEFINITIVA**: Apenas as setas de navegação devem parar a propagação.
+    container.querySelectorAll('.nav').forEach(el => {
+        ['mousedown', 'touchstart'].forEach(evt => {
             el.addEventListener(evt, e => e.stopPropagation());
         });
     });
 
-    videos.forEach(video => {
-      const wrapper = video.closest('.media-wrapper');
+    // Configuração dos controles para cada slide
+    wrappers.forEach(wrapper => {
+
+    // --- LÓGICA ATUALIZADA PARA POPUP DE DESCRIÇÃO ---
+      const descIcon = wrapper.querySelector('.description-icon-btn');
+      const descPopup = wrapper.querySelector('.description-popup');
+
+      if (descIcon && descPopup) {
+        // Ao clicar no ícone...
+        descIcon.addEventListener('click', (e) => {
+          e.stopPropagation(); // Impede que o listener global feche o popup imediatamente
+          descPopup.classList.toggle('active');
+        });
+
+        // Ao clicar em QUALQUER LUGAR dentro do popup...
+        descPopup.addEventListener('click', (e) => {
+          e.stopPropagation(); // Impede que o listener global feche o popup
+        });
+
+        // Ao clicar no botão de fechar (a lógica original permanece)
+        descPopup.querySelector('.description-close-btn').addEventListener('click', () => {
+          descPopup.classList.remove('active');
+        });
+      }
+
+    // --- NOVO: LÓGICA PARA CLICAR NA ÁREA DO VÍDEO E DAR PLAY/PAUSE ---
+
+
+      const video = wrapper.querySelector('video');
+      if (!video) return; // Pula para o próximo se o wrapper não tiver um vídeo
+
       const playPauseBtn = wrapper.querySelector('.play-pause-btn');
       const progressBar = wrapper.querySelector('.progress-bar');
-      const progress = wrapper.querySelector('.progress');
-      const overlay = wrapper.querySelector('.play-overlay');
-      const fadeOverlay = wrapper.querySelector('.fade-overlay');
       const currentTimeEl = wrapper.querySelector('.current-time');
       const totalDurationEl = wrapper.querySelector('.total-duration');
-  
-  // 1. Criamos uma função reutilizável para atualizar a duração
-  const updateDurationDisplay = () => {
-    // 2. Adicionamos uma verificação de segurança. Só atualiza se a duração for um número válido.
-    // isFinite() checa se o valor não é NaN, Infinity, ou -Infinity.
-    if (totalDurationEl && isFinite(video.duration)) {
-      totalDurationEl.textContent = formatTime(video.duration);
-    }
-  }
+      const volumeBtn = wrapper.querySelector('.volume-btn');
+      const volumeSlider = wrapper.querySelector('.volume-slider');
 
-  // 3. Ouvimos múltiplos eventos para garantir a captura da duração.
-  // Qualquer um que chegar primeiro com a informação correta irá funcionar.
-  video.addEventListener('loadedmetadata', updateDurationDisplay);
-  video.addEventListener('durationchange', updateDurationDisplay);
-  video.addEventListener('canplay', updateDurationDisplay);
-
-  // ... resto do código do forEach (ontimeupdate, onplay, etc.)
-
-      video.ontimeupdate = () => {
-        if (progress) progress.style.width = `${(video.currentTime / video.duration) * 100}%`;
-        if (currentTimeEl) currentTimeEl.textContent = formatTime(video.currentTime);
-      };
-video.onplay = () => {
-    carrosseis.states[id].isPlaying = true;
-    if(playPauseBtn) playPauseBtn.textContent = '❚❚';
-    if(overlay) overlay.style.display = 'none';
-    if(fadeOverlay) fadeOverlay.style.opacity = '0';
-    wrapper.classList.add('video-is-playing');
-
-    // --- NOVO: DEVOLVE O CONTROLE DA OPACIDADE PARA O CSS AO REPRODUZIR ---
-    const controls = wrapper.querySelector('.video-controls');
-    const title = wrapper.querySelector('.slide-title');
-    // Remover o estilo inline permite que as regras de :hover e .user-inactive do CSS voltem a funcionar
-    if (controls) controls.style.opacity = ''; 
-    if (title) title.style.opacity = '';
-};
-video.onpause = () => {
-    carrosseis.states[id].isPlaying = false;
-    if(playPauseBtn) playPauseBtn.textContent = '▶';
-    if(overlay) overlay.style.display = 'block';
-    wrapper.classList.remove('video-is-playing');
-
-    // --- NOVO: FORÇA A VISIBILIDADE DOS CONTROLES E TÍTULO AO PAUSAR ---
-    const controls = wrapper.querySelector('.video-controls');
-    const title = wrapper.querySelector('.slide-title');
-    if (controls) controls.style.opacity = '1';
-    if (title) title.style.opacity = '1';
-};
-      video.onended = () => {
-        if (globalEndMode === 0) {
-          nextMedia(id, true);
-        } else if (globalEndMode === 1) {
-          if(fadeOverlay) fadeOverlay.style.opacity = '1';
-          setTimeout(() => {
-            video.currentTime = 0;
-            if(fadeOverlay) fadeOverlay.style.opacity = '0';
-            video.play();
-          }, 500);
-        } else if (globalEndMode === 2) {
-          video.currentTime = 0;
-        }
-      };
+      // --- LÓGICA DOS CONTROLES (EVENT LISTENERS DIRETOS) ---
       
-      wrapper.querySelector('.end-mode-btn')?.addEventListener('click', () => {
+      playPauseBtn?.addEventListener('click', () => {
+        video.paused ? video.play() : video.pause();
+      });
+      
+      progressBar?.addEventListener('click', (e) => {
+        const rect = progressBar.getBoundingClientRect();
+        video.currentTime = ((e.clientX - rect.left) / rect.width) * video.duration;
+      });
+      
+       wrapper.querySelector('.end-mode-btn')?.addEventListener('click', () => {
         globalEndMode = (globalEndMode + 1) % endModesConfig.length;
         atualizarTodosOsBotoesDeModo();
       });
+
       wrapper.querySelector('.speed-btn')?.addEventListener('click', (e) => {
-        const btn = e.currentTarget;
         video.playbackRate = video.playbackRate === 1 ? 2.0 : 1.0;
-        btn.classList.toggle('active');
-        btn.textContent = video.playbackRate === 1 ? '1x' : '2x';
+        e.currentTarget.classList.toggle('active');
+        e.currentTarget.textContent = video.playbackRate === 1 ? '1x' : '2x';
       });
+
       wrapper.querySelector('.fullscreen-btn')?.addEventListener('click', () => {
         if (!document.fullscreenElement) {
           container.requestFullscreen().catch(err => alert(`Erro: ${err.message}`));
@@ -808,13 +1029,93 @@ video.onpause = () => {
         }
       });
       
-      if(playPauseBtn) playPauseBtn.onclick = () => void (video.paused ? video.play() : video.pause());
-      if(progressBar) progressBar.onclick = (e) => {
-        const rect = progressBar.getBoundingClientRect();
-        video.currentTime = ((e.clientX - rect.left) / rect.width) * video.duration;
+      if (volumeBtn && volumeSlider) {
+        let lastVolume = 1;
+        const updateVolumeUI = () => {
+          if (video.muted || video.volume === 0) {
+            volumeBtn.textContent = '🔇';
+            volumeSlider.value = 0;
+          } else {
+            volumeBtn.textContent = '🔊';
+            volumeSlider.value = video.volume;
+          }
+        };
+        volumeSlider.addEventListener('input', e => {
+          video.muted = false;
+          video.volume = e.target.value;
+        });
+        volumeBtn.addEventListener('click', () => {
+          if (video.muted) {
+            video.muted = false;
+            video.volume = lastVolume;
+          } else {
+            lastVolume = video.volume;
+            video.muted = true;
+          }
+        });
+        video.addEventListener('volumechange', updateVolumeUI);
+        updateVolumeUI();
+      }
+
+      // --- EVENTOS DO VÍDEO ---
+      video.addEventListener('play', () => {
+        carrosseis.states[id].isPlaying = true;
+        playPauseBtn.textContent = '❚❚';
+        wrapper.querySelector('.play-overlay').style.display = 'none';
+        wrapper.classList.add('video-is-playing');
+        wrapper.querySelector('.video-controls').style.opacity = '';
+        wrapper.querySelector('.slide-title').style.opacity = '';
+      });
+
+      video.addEventListener('pause', () => {
+        carrosseis.states[id].isPlaying = false;
+        playPauseBtn.textContent = '▶';
+        wrapper.querySelector('.play-overlay').style.display = 'block';
+        wrapper.classList.remove('video-is-playing');
+        wrapper.querySelector('.video-controls').style.opacity = '1';
+        wrapper.querySelector('.slide-title').style.opacity = '1';
+      });
+
+      const updateDurationDisplay = () => {
+        if (totalDurationEl && isFinite(video.duration)) {
+          totalDurationEl.textContent = formatTime(video.duration);
+        }
       };
+      video.addEventListener('loadedmetadata', updateDurationDisplay);
+      video.addEventListener('durationchange', updateDurationDisplay);
+
+      video.addEventListener('timeupdate', () => {
+        wrapper.querySelector('.progress').style.width = `${(video.currentTime / video.duration) * 100}%`;
+        currentTimeEl.textContent = formatTime(video.currentTime);
+      });
+
+      video.addEventListener('ended', () => {
+        if (globalEndMode === 0) { nextMedia(id, true); }
+        else if (globalEndMode === 1) {
+          const fadeOverlay = wrapper.querySelector('.fade-overlay');
+          fadeOverlay.style.opacity = '1';
+          setTimeout(() => {
+            video.currentTime = 0;
+            fadeOverlay.style.opacity = '0';
+            video.play();
+          }, 500);
+        } else {
+          video.currentTime = 0;
+        }
+      });
     });
 
+        container.addEventListener('click', () => {
+      // Encontra um popup que esteja ativo DENTRO DESTE carrossel específico.
+      const activePopup = container.querySelector('.description-popup.active');
+      
+      // Se encontrar, o fecha.
+      if (activePopup) {
+        activePopup.classList.remove('active');
+      }
+    });
+
+    // --- EVENTOS DE ARRASTO E INATIVIDADE ---
     container.addEventListener('mousedown', e => startDrag(e, id));
     container.addEventListener('mousemove', e => drag(e, id));
     container.addEventListener('mouseup', e => endDrag(e, id));
@@ -823,33 +1124,15 @@ video.onpause = () => {
     container.addEventListener('touchmove', e => drag(e, id));
     container.addEventListener('touchend', e => endDrag(e, id));
 
-    // --- EVENTOS MODIFICADOS PARA CONTROLE DE ATIVIDADE ---
     const defineAsActive = () => {
-        activeCarouselId = id;    // Define este como o carrossel ativo para os atalhos
-        resetInactivityTimer(id); // Reseta o timer de inatividade
+        activeCarouselId = id;
+        resetInactivityTimer(id);
     };
-
     container.addEventListener('mouseover', defineAsActive);
-    container.addEventListener('mousemove', () => {
-        // Apenas reseta o timer, não precisa redefinir o ID toda hora
-        if (carrosseis.states[id]) resetInactivityTimer(id);
-    });
-    container.addEventListener('touchstart', () => {
-    if (carrosseis.states[id]) resetInactivityTimer(id);
-}, { passive: true });
-
-    container.addEventListener('mousedown', defineAsActive); // Também define como ativo ao clicar
-    
-    container.addEventListener('mouseleave', () => {
-        // NÃO limpa mais o activeCarouselId.
-        const state = carrosseis.states[id];
-        if (state) {
-            // Apenas aciona o timer uma última vez para ver se os controles devem sumir
-            resetInactivityTimer(id);
-        }
-    });
-    // --- FIM DOS EVENTOS MODIFICADOS ---
-    // --- FIM DOS NOVOS EVENTOS ---
+    container.addEventListener('mousemove', () => { if (carrosseis.states[id]) resetInactivityTimer(id); });
+    container.addEventListener('touchstart', () => { if (carrosseis.states[id]) resetInactivityTimer(id); }, { passive: true });
+    container.addEventListener('mousedown', defineAsActive);
+    container.addEventListener('mouseleave', () => { if (carrosseis.states[id]) resetInactivityTimer(id); });
 
     const indexList = container.nextElementSibling;
     if (indexList && indexList.classList.contains('carousel-index')) {
@@ -861,35 +1144,37 @@ video.onpause = () => {
     updateArrowVisibility(id);
     updateSlideCounter(id);
     updateIndexHighlight(id);
-    //container.classList.add('user-inactive'); // Inicia com os controles escondidos
   }
 
-function startDrag(e, id) {
-  const state = carrosseis.states[id];
-  state.isDragging = true;
-  state.isSwipeIntent = null;
-  state.startX = e.touches ? e.touches[0].clientX : e.clientX;
-  state.startY = e.touches ? e.touches[0].clientY : e.clientY;
-  state.carouselEl.style.transition = 'none';
-}
+  function startDrag(e, id) {
+    const target = e.target;
+    // **NOVO**: Se o arrasto começar em um controle específico (exceto a barra de progresso), ignora.
+    if (target.closest('.control-btn, .volume-slider')) {
+      carrosseis.states[id].isDragging = false;
+      return;
+    }
+    const state = carrosseis.states[id];
+    state.isDragging = true;
+    state.isSwipeIntent = null;
+    state.startX = e.touches ? e.touches[0].clientX : e.clientX;
+    state.startY = e.touches ? e.touches[0].clientY : e.clientY;
+    state.carouselEl.style.transition = 'none';
+  }
+
   function drag(e, id) {
     const state = carrosseis.states[id];
     if (!state.isDragging) return;
-
     const currentX = e.touches ? e.touches[0].clientX : e.clientX;
     const currentY = e.touches ? e.touches[0].clientY : e.clientY;
     const diffX = currentX - state.startX;
     const diffY = currentY - state.startY;
-
     if (state.isSwipeIntent === null) {
       state.isSwipeIntent = Math.abs(diffY) > Math.abs(diffX) ? 'vertical' : 'horizontal';
     }
-
     if (state.isSwipeIntent === 'vertical') {
       state.isDragging = false;
       return;
     }
-    
     if (e.cancelable) e.preventDefault();
     const newTransform = -state.current * state.container.offsetWidth + diffX;
     state.carouselEl.style.transform = `translateX(${newTransform}px)`;
@@ -907,47 +1192,46 @@ function endDrag(e, id) {
   const endX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
   const diff = endX - state.startX;
 
+  // CENÁRIO 1: Foi um ARRASTO significativo.
   if (Math.abs(diff) > 10) {
     state.container.classList.add('no-click-after-drag');
     setTimeout(() => {
       state.container.classList.remove('no-click-after-drag');
     }, 50);
 
-    if (diff > 50 && state.current > 0) {
-      prevMedia(id);
-    } else if (diff < -50 && state.current < state.wrappers.length - 1) {
-      nextMedia(id);
-    } else {
-      showMedia(id, state.current);
-    }
+    if (diff > 50 && state.current > 0) { prevMedia(id); } 
+    else if (diff < -50 && state.current < state.wrappers.length - 1) { nextMedia(id); }
+    else { showMedia(id, state.current); }
   } 
+  // CENÁRIO 2: Foi um CLIQUE/TOQUE simples.
   else {
-    // --- INÍCIO DA LÓGICA DE CLIQUE/TOQUE UNIFICADA E CORRIGIDA ---
-    const activeWrapper = state.wrappers[state.current];
-    const video = activeWrapper?.querySelector('video');
+    // --- NOVA VERIFICAÇÃO ADICIONADA AQUI ---
+    // Procura por um popup de descrição que esteja ativo dentro do carrossel atual.
+    const activePopup = state.container.querySelector('.description-popup.active');
 
-    // A ação só acontece se houver um vídeo e o alvo não for os próprios controles.
+    // Se um popup ativo for encontrado, a função para aqui e não faz mais nada.
+    // Isso desabilita o clique no vídeo enquanto o popup estiver visível.
+    if (activePopup) {
+      return;
+    }
+    // --- FIM DA NOVA VERIFICAÇÃO ---
+
+    // Se nenhum popup ativo foi encontrado, a lógica original de play/pause continua.
+    const video = state.wrappers[state.current]?.querySelector('video');
+    
     if (video && !e.target.closest('.video-controls')) {
-      
-      // A LINHA MAIS IMPORTANTE: Previne o "ghost click" que causa o
-      // comportamento de pause/play imediato em dispositivos móveis.
       if (e.cancelable) e.preventDefault();
-      
-      // LÓGICA SIMPLIFICADA: Simplesmente alterna o estado do vídeo.
-      // Funciona da mesma forma para desktop (click) e mobile (tap).
       video.paused ? video.play() : video.pause();
     }
     
-    // Garante que o carrossel se ajuste de volta à posição correta.
     state.carouselEl.style.transform = `translateX(-${state.current * 100}%)`;
-    // --- FIM DA LÓGICA CORRIGIDA ---
   }
 }
 
   function showMedia(id, index, forcePlay = false) {
-    const state = carrosseis.states[id];
+  const state = carrosseis.states[id];
     if (!state) return;
-
+    state.container.querySelectorAll('.description-popup.active').forEach(p => p.classList.remove('active'));
     const oldVideo = state.wrappers[state.current]?.querySelector('video');
     if (oldVideo) oldVideo.pause();
 
@@ -955,54 +1239,58 @@ function endDrag(e, id) {
       state.carouselEl.style.transform = `translateX(-${index * 100}%)`;
       return;
     }
-
     const shouldBePlaying = state.isPlaying || forcePlay;
     if (oldVideo) oldVideo.currentTime = 0;
 
     state.wrappers.forEach(w => w.classList.remove('active'));
     state.wrappers[index]?.classList.add('active');
-
     state.current = index;
     localStorage.setItem(`carouselState_${id}`, JSON.stringify({ current: index }));
-
     state.carouselEl.style.transform = `translateX(-${index * 100}%)`;
-
     updateArrowVisibility(id);
     updateSlideCounter(id);
     updateIndexHighlight(id);
-
     const newVideo = state.wrappers[index]?.querySelector('video');
     if (shouldBePlaying && newVideo) {
       newVideo.play();
     }
   }
 
-  function nextMedia(id, forcePlay = false) {
-    const state = carrosseis.states[id];
-    if (state.current < state.wrappers.length - 1) {
-      showMedia(id, state.current + 1, forcePlay);
-    }
-  }
+// Em TEMPLATE_PAGINA, substitua as duas funções abaixo
 
-  function prevMedia(id) {
-    const state = carrosseis.states[id];
-    if (state.current > 0) {
-      showMedia(id, state.current - 1);
-    }
+function nextMedia(id, forcePlay = false) {
+  const state = carrosseis.states[id];
+  if (state.current < state.wrappers.length - 1) {
+    
+    // --- LINHA ADICIONADA ---
+    // Pausa explicitamente o vídeo do slide atual ANTES de avançar.
+    state.wrappers[state.current]?.querySelector('video')?.pause();
+    
+    showMedia(id, state.current + 1, forcePlay);
   }
+}
+
+function prevMedia(id) {
+  const state = carrosseis.states[id];
+  if (state.current > 0) {
+    
+    // --- LINHA ADICIONADA ---
+    // Pausa explicitamente o vídeo do slide atual ANTES de retroceder.
+    state.wrappers[state.current]?.querySelector('video')?.pause();
+    
+    showMedia(id, state.current - 1);
+  }
+}
 
   document.addEventListener('DOMContentLoaded', () => {
     const colorOptions = document.querySelectorAll('.color-option');
-    
     const setActiveColor = (selectedColor) => {
       colorOptions.forEach(option => {
         option.classList.toggle('active', option.dataset.color === selectedColor);
       });
     };
-
     const savedThemeColor = localStorage.getItem('appThemeColor') || '#a1a1a1';
     const savedThemeMode = localStorage.getItem('appThemeMode') || 'light';
-
     document.body.style.backgroundColor = savedThemeColor;
     document.body.classList.toggle('theme-is-dark', savedThemeMode === 'dark');
     setActiveColor(savedThemeColor);
@@ -1013,31 +1301,26 @@ function endDrag(e, id) {
     colorOptions.forEach(option => {
       option.addEventListener('click', () => {
         const newColor = option.dataset.color;
-        
         document.body.style.backgroundColor = newColor;
         localStorage.setItem('appThemeColor', newColor);
         setActiveColor(newColor);
-
         const isDark = isColorDark(newColor);
         document.body.classList.toggle('theme-is-dark', isDark);
         localStorage.setItem('appThemeMode', isDark ? 'dark' : 'light');
       });
+      
     });
 
-    // --- NOVO LISTENER GLOBAL DE TECLADO ---
     document.addEventListener('keydown', (e) => {
-        // Se nenhum carrossel estiver ativo (mouse em cima), não faz nada
         if (!activeCarouselId) return;
+        const state = carrosseis.states[activeCarouselId];
+        if (!state) return;
 
         switch (e.key) {
             case ' ':
-                // Previne o comportamento padrão da barra de espaço (rolar a página)
                 e.preventDefault();
-                const state = carrosseis.states[activeCarouselId];
                 const video = state.wrappers[state.current]?.querySelector('video');
-                if (video) {
-                    video.paused ? video.play() : video.pause();
-                }
+                if (video) { video.paused ? video.play() : video.pause(); }
                 break;
             case 'ArrowRight':
                 e.preventDefault();
@@ -1049,7 +1332,6 @@ function endDrag(e, id) {
                 break;
         }
     });
-
   });
 </script>
 
