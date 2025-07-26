@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Camada_2" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 38 29.1">
+  <!-- Generator: Adobe Illustrator 29.0.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 186)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: url(#Gradiente_sem_nome_52);
+        stroke: #a3a3a3;
+        stroke-miterlimit: 10;
+        stroke-width: .8px;
+      }
+    </style>
+    <linearGradient id="Gradiente_sem_nome_52" data-name="Gradiente sem nome 52" x1="2.7" y1="39.3" x2="21.2" y2="8.9" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#000"/>
+      <stop offset="0" stop-color="#0f0f0f"/>
+      <stop offset="0" stop-color="#272727"/>
+      <stop offset=".2" stop-color="#606060"/>
+      <stop offset=".3" stop-color="#909090"/>
+      <stop offset=".5" stop-color="#b8b8b8"/>
+      <stop offset=".6" stop-color="#d7d7d7"/>
+      <stop offset=".8" stop-color="#ededed"/>
+      <stop offset=".9" stop-color="#fafafa"/>
+      <stop offset="1" stop-color="#fff"/>
+    </linearGradient>
+  </defs>
+  <polygon class="st0" points="33 15 21.6 21.6 10 28.2 10 1.7 33 15"/>
+</svg>

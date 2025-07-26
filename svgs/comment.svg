@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Camada_2" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 50.1 40.2">
+  <!-- Generator: Adobe Illustrator 29.0.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 186)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: url(#Gradiente_sem_nome_153);
+      }
+
+      .st1 {
+        fill: url(#Gradiente_sem_nome);
+      }
+
+      .st2 {
+        fill: none;
+        stroke: #616161;
+        stroke-miterlimit: 10;
+      }
+    </style>
+    <linearGradient id="Gradiente_sem_nome_153" data-name="Gradiente sem nome 153" x1="14.6" y1="29.6" x2="55" y2="-9.2" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset=".1" stop-color="#fafafa"/>
+      <stop offset=".2" stop-color="#ececec"/>
+      <stop offset=".4" stop-color="#d6d6d5"/>
+      <stop offset=".5" stop-color="#b6b6b5"/>
+      <stop offset=".7" stop-color="#8d8d8c"/>
+      <stop offset=".8" stop-color="#5b5b5a"/>
+      <stop offset="1" stop-color="#21211f"/>
+      <stop offset="1" stop-color="#1d1d1b"/>
+    </linearGradient>
+    <radialGradient id="Gradiente_sem_nome" data-name="Gradiente sem nome" cx="-44.3" cy="31.9" fx="-44.3" fy="31.9" r="76.4" gradientTransform="translate(62.2) rotate(-180) scale(1 -1)" gradientUnits="userSpaceOnUse">
+      <stop offset=".1" stop-color="#fff"/>
+      <stop offset=".2" stop-color="#fbfbfb"/>
+      <stop offset=".4" stop-color="#f0f0f0"/>
+      <stop offset=".5" stop-color="#dedede"/>
+      <stop offset=".6" stop-color="#c5c5c4"/>
+      <stop offset=".7" stop-color="#a4a4a4"/>
+      <stop offset=".8" stop-color="#7c7c7b"/>
+      <stop offset=".9" stop-color="#4e4e4c"/>
+      <stop offset="1" stop-color="#1d1d1b"/>
+    </radialGradient>
+  </defs>
+  <g id="Camada_1-2">
+    <path id="Comentário" class="st0" d="M27.9,2.6c-11.1,0-20.1,6.4-20.1,14.2s2.3,7.5,6,10.1v8.1l8.9-4.6c1.7.3,3.5.6,5.3.6,11.1,0,20.1-6.4,20.1-14.2S39.1,2.6,27.9,2.6Z"/>
+  </g>
+  <path class="st1" d="M57.2,6l.2,18.9h0c0,0,0,6.6,0,6.6l5.6-6.5h27.4c1.9,0,3.4-1.5,3.4-3.3V6c0-1.9-1.5-3.4-3.4-3.4h-29.9c-1.8,0-3.3,1.5-3.3,3.4Z"/>
+  <g>
+    <line class="st2" x1="61.1" y1="7.2" x2="89.4" y2="7.2"/>
+    <line class="st2" x1="61.1" y1="10.9" x2="82.5" y2="10.9"/>
+    <line class="st2" x1="61.1" y1="14.6" x2="86.1" y2="14.6"/>
+    <line class="st2" x1="61.1" y1="18.3" x2="79.3" y2="18.3"/>
+  </g>
+</svg>

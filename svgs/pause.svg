@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Camada_2" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 38 29.1">
+  <!-- Generator: Adobe Illustrator 29.0.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 186)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: url(#Gradiente_sem_nome_171);
+      }
+
+      .st1 {
+        fill: url(#Gradiente_sem_nome_17);
+      }
+    </style>
+    <linearGradient id="Gradiente_sem_nome_17" data-name="Gradiente sem nome 17" x1="12.5" y1="35" x2="12.5" y2="4.2" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#000"/>
+      <stop offset="0" stop-color="#0f0f0f"/>
+      <stop offset=".1" stop-color="#464646"/>
+      <stop offset=".2" stop-color="#787878"/>
+      <stop offset=".3" stop-color="#a1a1a1"/>
+      <stop offset=".4" stop-color="#c3c3c3"/>
+      <stop offset=".5" stop-color="#ddd"/>
+      <stop offset=".6" stop-color="#f0f0f0"/>
+      <stop offset=".7" stop-color="#fbfbfb"/>
+      <stop offset=".8" stop-color="#fff"/>
+    </linearGradient>
+    <linearGradient id="Gradiente_sem_nome_171" data-name="Gradiente sem nome 17" x1="25.5" y1="35" x2="25.5" y2="4.2" xlink:href="#Gradiente_sem_nome_17"/>
+  </defs>
+  <rect class="st1" x="9" y="3.9" width="7" height="21.3"/>
+  <rect class="st0" x="22" y="3.9" width="7" height="21.3"/>
+</svg>
