@@ -405,49 +405,71 @@
   align-items: center;
 }
 
+/* 2. O Slider (a barra) */
 .volume-slider {
-  width: 0; /* Começa com largura zero */
+  /* Controla a aparição horizontal */
+  width: 0;
   opacity: 0;
-  pointer-events: none;
   margin-left: 0;
+  pointer-events: none;
   transition: width 0.3s ease, opacity 0.2s ease, margin-left 0.3s ease;
-  
-  /* Estilos visuais (semelhantes aos de antes) */
+
+  /* Estilos visuais da barra */
   -webkit-appearance: none;
   appearance: none;
-  background: rgba(255, 255, 255, 0.4);
+  background-color: rgba(255, 255, 255, 0.4);
   height: 5px;
   border-radius: 5px;
   cursor: pointer;
+  outline: none; /* Remove o brilho de foco */
 }
 
 /* 3. A Lógica de Aparição */
 .volume-container:hover .volume-slider {
-  width: 40px; /* Expande para a largura total */
+  width: 45px;
   opacity: 1;
+  margin-left: 10px;
   pointer-events: auto;
-  margin-left: 10px; /* Cria um espaço ao aparecer */
 }
 
-/* Esconde as partes do "polegar" quando o slider está recolhido */
+/* --- ESTILIZAÇÃO DA BOLINHA (THUMB) --- */
+
+/* 4. Estilo da Bolinha para WebKit (Chrome, Safari, Edge) */
 .volume-slider::-webkit-slider-thumb {
-  opacity: 0;
-  transition: opacity 0.2s ease 0.1s; /* Aparece com um pequeno atraso */
-}
-.volume-slider::-moz-range-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  
+  /* --- A COR QUE VOCÊ QUER MUDAR ESTÁ AQUI --- */
+  background: #00aaff; /* Exemplo: azul vibrante */
+  
+  /* Garante que a bolinha seja visível apenas quando o slider estiver expandido */
   opacity: 0;
   transition: opacity 0.2s ease 0.1s;
 }
 
-/* Mostra o "polegar" quando o slider está expandido */
+/* Mostra a bolinha quando o slider está visível */
 .volume-container:hover .volume-slider::-webkit-slider-thumb {
   opacity: 1;
 }
-.volume-container:hover .volume-slider::-moz-range-thumb {
-  opacity: 1;
+
+/* 5. Estilo da Bolinha para Firefox */
+.volume-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: none;
+  
+  /* --- A COR QUE VOCÊ QUER MUDAR ESTÁ AQUI TAMBÉM --- */
+  background: #00aaff; /* Mantenha a mesma cor */
+  
+  /* O Firefox não lida bem com a opacidade do thumb, então o deixamos sempre visível */
+  /* mas ele só aparecerá quando a barra (width > 0) estiver visível. */
 }
 
-/* --\-- */
+/* --//-- */
 
 /* REMOVA o posicionamento absoluto do contador, pois o pai agora cuida disso */
 .slide-counter {
