@@ -937,7 +937,7 @@ sdajf asdjf nhiosadnfoi auhowiuen odjanajdfndj osadfadfsd ag dsf ndfgnbc dfg ndf
     }, 3000);
   }
 
-  // VERSÃO CORRIGIDA FINAL - SUBSTITUA SUA FUNÇÃO POR ESTA
+  // FUNÇÃO COMPLETA COM A CORREÇÃO - PODE SUBSTITUIR TUDO
   function initCarousel(id) {
     const container = document.getElementById(id);
     if (!container) return;
@@ -968,7 +968,6 @@ sdajf asdjf nhiosadnfoi auhowiuen odjanajdfndj osadfadfsd ag dsf ndfgnbc dfg ndf
     const startOfToday = new Date().setHours(0, 0, 0, 0);
 
     wrappers.forEach(wrapper => {
-      // --- LÓGICA DA DESCRIÇÃO ---
       const descIconBtn = wrapper.querySelector('.description-icon-btn');
       const descPopup = wrapper.querySelector('.description-popup');
       const mediaId = wrapper.dataset.mediaId;
@@ -996,7 +995,6 @@ sdajf asdjf nhiosadnfoi auhowiuen odjanajdfndj osadfadfsd ag dsf ndfgnbc dfg ndf
         });
       }
 
-      // --- LÓGICA DO VÍDEO E CONTROLES ---
       const video = wrapper.querySelector('video');
       if (!video) return; 
 
@@ -1007,7 +1005,6 @@ sdajf asdjf nhiosadnfoi auhowiuen odjanajdfndj osadfadfsd ag dsf ndfgnbc dfg ndf
       const volumeBtn = wrapper.querySelector('.volume-btn');
       const volumeSlider = wrapper.querySelector('.volume-slider');
       
-      // --- [BLOCO RESTAURADO] LÓGICA DO SOM, VELOCIDADE, ETC. ---
       playPauseBtn?.addEventListener('click', () => { video.paused ? video.play() : video.pause(); });
       
       progressBar?.addEventListener('click', (e) => {
@@ -1062,7 +1059,6 @@ sdajf asdjf nhiosadnfoi auhowiuen odjanajdfndj osadfadfsd ag dsf ndfgnbc dfg ndf
         video.addEventListener('volumechange', updateVolumeUI);
         updateVolumeUI();
       }
-      // --- FIM DO BLOCO RESTAURADO ---
 
       const playPauseIcon = playPauseBtn.querySelector('img');
       const playOverlay = wrapper.querySelector('.play-overlay');
@@ -1093,9 +1089,16 @@ sdajf asdjf nhiosadnfoi auhowiuen odjanajdfndj osadfadfsd ag dsf ndfgnbc dfg ndf
       video.addEventListener('loadedmetadata', updateDurationDisplay);
       video.addEventListener('durationchange', updateDurationDisplay);
 
+      // --- ESTE É O BLOCO CORRIGIDO ---
       video.addEventListener('timeupdate', () => {
-        wrapper.querySelector('.progress').style.width = `${(video.currentTime / video.duration) * 100}%`;
+        if (isFinite(video.duration)) {
+            wrapper.querySelector('.progress').style.width = `${(video.currentTime / video.duration) * 100}%`;
+        }
         currentTimeEl.textContent = formatTime(video.currentTime);
+
+        if (totalDurationEl.textContent.includes("00:00") && isFinite(video.duration)) {
+          updateDurationDisplay();
+        }
       });
 
       video.addEventListener('ended', () => {
@@ -1119,7 +1122,6 @@ sdajf asdjf nhiosadnfoi auhowiuen odjanajdfndj osadfadfsd ag dsf ndfgnbc dfg ndf
       }
     });
 
-    // --- LÓGICA DE ARRASTAR ---
     container.addEventListener('mousedown', e => startDrag(e, id));
     container.addEventListener('mousemove', e => drag(e, id));
     container.addEventListener('mouseup', e => endDrag(e, id));
