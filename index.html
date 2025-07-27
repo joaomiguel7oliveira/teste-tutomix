@@ -353,11 +353,11 @@
   }
 
   /* --- 7. REGRAS DE ADAPTAÇÃO (HOVER E INATIVIDADE) --- */
-
+  
 .media-wrapper:not(.video-is-playing) video {
   transform: translateZ(0);
 }
-  
+
   .carousel-container:hover .video-controls,
   .carousel-container:hover .slide-title {
       opacity: 1;
@@ -1234,7 +1234,12 @@ function endDrag(e, id) {
     if (!state) return;
     state.container.querySelectorAll('.description-popup.active').forEach(p => p.classList.remove('active'));
     const oldVideo = state.wrappers[state.current]?.querySelector('video');
-    if (oldVideo) oldVideo.pause();
+if (oldVideo) {
+    oldVideo.pause();
+    oldVideo.currentTime = 0; // <-- ADICIONE ESTA LINHA
+}
+    
+    
 
     if (index === state.current && !forcePlay) {
       state.carouselEl.style.transform = `translateX(-${index * 100}%)`;
