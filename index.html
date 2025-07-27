@@ -353,6 +353,10 @@
   }
 
   /* --- 7. REGRAS DE ADAPTAÇÃO (HOVER E INATIVIDADE) --- */
+
+.media-wrapper:not(.video-is-playing) video {
+  transform: translateZ(0);
+}
   
   .carousel-container:hover .video-controls,
   .carousel-container:hover .slide-title {
