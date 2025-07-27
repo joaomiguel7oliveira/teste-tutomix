@@ -3,7 +3,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=0.9">
 <title>Galeria de Mídia Dinâmica</title>
 <style>
   /* --- 1. LAYOUT GERAL E TEMA --- */
@@ -114,7 +114,7 @@
     width: 100%;
     height: 100%;
     transition: transform 0.3s ease-in-out;
-    will-change: transform;
+    /*will-change: transform;*/
   }
 
   .media-wrapper {
@@ -124,7 +124,6 @@
     opacity: 0.25;
     position: relative;
     transition: opacity 0.3s ease-in-out;
-    transform: translateZ(0);
   }
 
   .media-wrapper.active {
