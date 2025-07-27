@@ -1024,7 +1024,12 @@ sdajf asdjf nhiosadnfoi auhowiuen odjanajdfndj osadfadfsd ag dsf ndfgnbc dfg ndf
       });
 
       wrapper.querySelector('.fullscreen-btn')?.addEventListener('click', () => {
+        const state = carrosseis.states[id]; // Pega o estado do carrossel atual
         if (!document.fullscreenElement) {
+          // [NOVO] Se o estado existe, anota a posição da rolagem antes de entrar
+          if (state) {
+            state.scrollPos = window.scrollY;
+          }
           container.requestFullscreen().catch(err => alert(`Erro: ${err.message}`));
         } else {
           document.exitFullscreen();
@@ -1280,6 +1285,21 @@ function prevMedia(id) {
 
     document.querySelectorAll('.carousel-container').forEach(c => initCarousel(c.id));
     atualizarTodosOsBotoesDeModo();
+
+    document.addEventListener('fullscreenchange', () => {
+      // Se não há mais nenhum elemento em tela cheia (acabamos de sair)
+      // E nós sabemos qual era o carrossel ativo...
+      if (!document.fullscreenElement && activeCarouselId) {
+        const state = carrosseis.states[activeCarouselId];
+        // Se encontramos uma posição de rolagem anotada para aquele carrossel...
+        if (state && typeof state.scrollPos === 'number') {
+          // ...manda a janela rolar de volta para lá.
+          window.scrollTo({ top: state.scrollPos, behavior: 'instant' });
+          // Limpa a anotação para não causar problemas depois.
+          state.scrollPos = null; 
+        }
+      }
+    });
     
     colorOptions.forEach(option => {
       option.addEventListener('click', () => {
